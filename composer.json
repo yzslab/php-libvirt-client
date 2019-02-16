@@ -1,0 +1,32 @@
+{
+  "name": "yuninternet/php-libvirt-client",
+  "description": "libvirtd php client",
+  "keywords": ["libvirt", "php"],
+  "license": "MIT",
+  "authors": [
+    {
+      "name": "Zhensheng Yuan",
+      "homepage": "https://zhensheng.im",
+      "role": "Developer"
+    }
+  ],
+  "require": {
+    "php": ">=7.0.0",
+    "ext-libvirt": "*",
+    "ext-simplexml": "*",
+    "ext-dom": "*"
+  },
+  "require-dev": {
+    "phpunit/phpunit": "^6"
+  },
+  "autoload": {
+    "psr-4": {
+      "YunInternet\\Libvirt\\": "src/YunInternet/Libvirt"
+    }
+  },
+  "autoload-dev": {
+    "psr-4": {
+      "YunInternet\\Libvirt\\Test\\": "tests/YunInternet/Libvirt/Test"
+    }
+  }
+}
