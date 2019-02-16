@@ -13,6 +13,10 @@ namespace YunInternet\Libvirt;
  * @method bool libvirt_storagepool_create()
  * @method bool libvirt_storagepool_set_autostart(bool $autostart)
  * @method bool libvirt_storagepool_get_autostart() Returns: TRUE if success, FALSE on error
+ * @method bool libvirt_storagepool_destroy()
+ * @method bool libvirt_storagepool_delete()
+ * @method bool libvirt_storagepool_undefine()
+ * @method resource libvirt_storagevolume_lookup_by_name(string $name)
  * @package YunInternet\Libvirt
  */
 class StoragePool extends Libvirt
@@ -22,6 +26,10 @@ class StoragePool extends Libvirt
         "libvirt_storagepool_create" => true,
         "libvirt_storagepool_set_autostart" => true,
         "libvirt_storagepool_get_autostart" => true,
+        "libvirt_storagepool_destroy" => true,
+        "libvirt_storagepool_delete" => true,
+        "libvirt_storagepool_undefine" => true,
+        "libvirt_storagevolume_lookup_by_name" => true,
     ];
 
     private $storagePoolResource;
@@ -33,8 +41,14 @@ class StoragePool extends Libvirt
 
     public function storageVolumeCreateXML($xml, $flags = 0)
     {
-        $storageVolume = $this->libvirt_storagevolume_create_xml($xml, $flags);
-        return new StorageVolume($storageVolume);
+        $storageVolumeResource = $this->libvirt_storagevolume_create_xml($xml, $flags);
+        return new StorageVolume($storageVolumeResource);
+    }
+
+    public function storageVolumeLookupByName($name)
+    {
+        $storageVolumeResource = $this->libvirt_storagevolume_lookup_by_name($name);
+        return new StorageVolume($storageVolumeResource);
     }
 
     protected function getResources($functionName)

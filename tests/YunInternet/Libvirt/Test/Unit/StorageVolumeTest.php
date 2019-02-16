@@ -63,5 +63,8 @@ class StorageVolumeTest extends TestCase
         print $storageVolumeWithBackingStore->getFormattedXML();
 
         $this->assertTrue(is_resource($this->storagePool()->libvirt_storagevolume_create_xml($storageVolumeWithBackingStore->getXML(), 0)));
+
+        $storageVolumeInstance = $this->storagePool()->storageVolumeLookupByName("testStorageVolumeWithBackingStore");
+        $this->assertInstanceOf(\YunInternet\Libvirt\StorageVolume::class, $storageVolumeInstance);
     }
 }

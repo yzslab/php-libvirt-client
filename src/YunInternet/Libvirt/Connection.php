@@ -18,6 +18,7 @@ use YunInternet\Libvirt\Exception\LibvirtException as Exception;
  * @method string[] libvirt_list_domains
  * @method resource[] libvirt_list_domain_resources
  * @method resource libvirt_domain_new($name, $arch, $memMB, $maxmemMB, $vcpus, $iso_image, $disks, $networks, $flags)
+ * @method resource libvirt_domain_lookup_by_name(string $name)
  * @method resource libvirt_domain_define_xml(string $xml)
  * @method string libvirt_connect_get_capabilities($xpath = null)
  * @method resource libvirt_storagepool_define_xml(string $xml)
@@ -49,6 +50,7 @@ class Connection extends Libvirt
         "libvirt_connect_get_nic_models" => true,
         "libvirt_connect_get_soundhw_models" => true,
         "libvirt_domain_new" => true,
+        "libvirt_domain_lookup_by_name" => true,
         "libvirt_domain_define_xml" => true,
         "libvirt_domain_create_xml" => true,
         "libvirt_list_domains" => true,
@@ -105,6 +107,12 @@ class Connection extends Libvirt
     {
         $domain = $this->libvirt_domain_define_xml($xml);
         return new Domain($domain, $this);
+    }
+
+    public function domainLookupByName($name)
+    {
+        $domainResource = $this->libvirt_domain_lookup_by_name($name);
+        return new Domain($domainResource, $this);
     }
 
     public function storagePoolDefineXML($xml)

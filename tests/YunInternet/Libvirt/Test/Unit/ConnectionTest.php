@@ -8,6 +8,8 @@
 namespace YunInternet\Libvirt\Test\Unit;
 
 
+use YunInternet\Libvirt\Domain;
+use YunInternet\Libvirt\Exception\ErrorCode;
 use YunInternet\Libvirt\Exception\LibvirtException;
 use YunInternet\Libvirt\Test\BaseConnectionTestCase;
 
@@ -46,6 +48,19 @@ class ConnectionTest extends BaseConnectionTestCase
         print $capabilities;
 
         $this->assertTrue(is_string($capabilities));
+    }
+
+    public function testDomainLookupByName()
+    {
+        $domain = $this->getLibvirtConnection()->domainLookupByName("test");
+        $this->assertInstanceOf(Domain::class, $domain);
+
+        try {
+            @$this->getLibvirtConnection()->domainLookupByName("not-exists");
+            $this->assertFalse(true);
+        } catch (LibvirtException $libvirtException) {
+            $this->assertEquals(ErrorCode::DOMAIN_NOT_FOUND, $libvirtException->getCode());
+        }
     }
 
     /**
