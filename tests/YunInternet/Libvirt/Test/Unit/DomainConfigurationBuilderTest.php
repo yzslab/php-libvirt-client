@@ -132,8 +132,14 @@ class DomainConfigurationBuilderTest extends TestCase
 
         $this->assertTrue($domain->libvirt_domain_create());
 
-        $this->expectException(LibvirtException::class);
-        @$domain->libvirt_domain_create();
+        try {
+            @$domain->libvirt_domain_create();
+            $this->assertFalse(true);
+        } catch (LibvirtException $e) {
+            $this->assertTrue(true);
+        }
+
+        $connection->domainLookupByName("Test");
 
         $this->assertTrue($domain->libvirt_domain_destroy());
         $this->assertTrue($domain->libvirt_domain_undefine());

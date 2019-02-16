@@ -12,6 +12,7 @@ use PHPUnit\Framework\TestCase;
 use YunInternet\Libvirt\Configuration\StoragePool;
 use YunInternet\Libvirt\Connection;
 use YunInternet\Libvirt\Exception\ErrorCode;
+use YunInternet\Libvirt\Exception\LibvirtException;
 use YunInternet\Libvirt\Test\LibvirtTestConnection;
 
 class StoragePoolTest extends TestCase
@@ -31,12 +32,19 @@ class StoragePoolTest extends TestCase
         $this->assertInstanceOf(\YunInternet\Libvirt\StoragePool::class, $storagePoolInstance = $this->connection()->storagePoolLookupByName("testDirectoryStoragePool"));
 
         $storagePoolInstance->libvirt_storagepool_create();
-        $this->expectExceptionCode(ErrorCode::STORAGE_POOL_IS_ACTIVE);
-        @$storagePoolInstance->libvirt_storagepool_create();
+        try {
+            @$storagePoolInstance->libvirt_storagepool_create();
+            $this->assertFalse(true);
+        } catch (LibvirtException $libvirtException) {
+            $this->assertEquals(ErrorCode::STORAGE_POOL_IS_ACTIVE, $libvirtException->getCode());
+        }
 
         $this->assertTrue($storagePoolInstance->libvirt_storagepool_set_autostart(true));
         $this->assertTrue($storagePoolInstance->libvirt_storagepool_get_autostart());
         $this->assertTrue($storagePoolInstance->libvirt_storagepool_set_autostart(false));
         $this->assertFalse($storagePoolInstance->libvirt_storagepool_get_autostart());
+        $this->assertTrue($storagePoolInstance->libvirt_storagepool_destroy());
+        $this->assertTrue($storagePoolInstance->libvirt_storagepool_delete());
+        $this->assertTrue($storagePoolInstance->libvirt_storagepool_undefine());
     }
 }
