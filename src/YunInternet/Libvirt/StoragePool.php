@@ -17,6 +17,8 @@ namespace YunInternet\Libvirt;
  * @method bool libvirt_storagepool_delete()
  * @method bool libvirt_storagepool_undefine()
  * @method resource libvirt_storagevolume_lookup_by_name(string $name)
+ * @method bool libvirt_storagepool_refresh()
+ * @method string[] libvirt_storagepool_list_volumes()
  * @package YunInternet\Libvirt
  */
 class StoragePool extends Libvirt
@@ -29,7 +31,9 @@ class StoragePool extends Libvirt
         "libvirt_storagepool_destroy" => true,
         "libvirt_storagepool_delete" => true,
         "libvirt_storagepool_undefine" => true,
+        "libvirt_storagepool_refresh" => true,
         "libvirt_storagevolume_lookup_by_name" => true,
+        "libvirt_storagepool_list_volumes" => true,
     ];
 
     private $storagePoolResource;
