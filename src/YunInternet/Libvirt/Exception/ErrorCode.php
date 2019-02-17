@@ -27,4 +27,6 @@ interface ErrorCode
     const STORAGE_POOL_IS_ACTIVE = 10019;
 
     const DOMAIN_NOT_FOUND = 10020;
+
+    const STORAGE_VOLUME_NOT_FOUND = 10021;
 }

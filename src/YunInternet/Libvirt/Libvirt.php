@@ -94,6 +94,8 @@ abstract class Libvirt
             $errorCode = ErrorCode::STORAGE_POOL_IS_ACTIVE;
         else if (self::isErrorMessageContainString($message, "Domain not found"))
             $errorCode = ErrorCode::DOMAIN_NOT_FOUND;
+        else if (self::isErrorMessageContainString($message, "Storage volume not found:"))
+            $errorCode = ErrorCode::STORAGE_VOLUME_NOT_FOUND;
 
         throw new LibvirtException($message, $errorCode);
     }

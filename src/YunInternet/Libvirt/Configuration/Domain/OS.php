@@ -22,6 +22,7 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract bootmenu()
  * @method XMLElementContract type()
  * @method XMLElementContract loader()
+ * @method XMLElementContract smbios()
  * @package YunInternet\Libvirt\Configuration\Domain
  */
 class OS extends SimpleXMLImplement
@@ -58,6 +59,12 @@ class OS extends SimpleXMLImplement
     public function setArchitecture($architecture)
     {
         $this->type()->setAttribute("arch", $architecture);
+        return $this;
+    }
+
+    public function setMachine($machine)
+    {
+        $this->type()->setAttribute("machine", "q35");
         return $this;
     }
 
@@ -103,6 +110,12 @@ class OS extends SimpleXMLImplement
     public function addBootDevice($bootDevice)
     {
         $this->addChild("boot", null, ["dev" => $bootDevice]);
+        return $this;
+    }
+
+    public function setSMBIOSMode($mode)
+    {
+        $this->smbios()->setAttribute("mode", $mode);
         return $this;
     }
 }
