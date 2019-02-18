@@ -13,6 +13,7 @@ use YunInternet\Libvirt\Configuration\Domain\CPU;
 use YunInternet\Libvirt\Configuration\Domain\Device;
 use YunInternet\Libvirt\Configuration\Domain\OS;
 use YunInternet\Libvirt\Configuration\Domain\PowerManagement;
+use YunInternet\Libvirt\Configuration\Domain\SysInfo;
 use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
@@ -209,6 +210,11 @@ class Domain extends SimpleXMLImplement
         if (is_null($this->blkiotune))
             $this->blkiotune = new BlockIOTune($this->getSimpleXMLElement()->addChild("blkiotune"));
         return $this->blkiotune;
+    }
+
+    public function sysinfo()
+    {
+        return new SysInfo($this->getSimpleXMLElement()->addChild("sysinfo"));
     }
 
     private function initFeatures()
