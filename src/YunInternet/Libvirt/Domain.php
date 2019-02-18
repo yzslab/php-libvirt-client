@@ -11,7 +11,9 @@ namespace YunInternet\Libvirt;
  * Class Domain
  * @method bool libvirt_domain_create()
  * @method bool libvirt_domain_destroy()
- * @method string libvirt_domain_get_xml_desc($xpath = null, int $flags = 0)
+ * @method string libvirt_domain_get_xml_desc($xpath, int $flags = 0)
+ * @method array libvirt_domain_get_disk_devices()
+ * @method array libvirt_domain_get_block_info(string $dev)
  * @method bool libvirt_domain_undefine()
  * @method bool libvirt_domain_update_device(string $xml, int $flags = 0) $flags [int]:	Flags to update the device (VIR_DOMAIN_DEVICE_MODIFY_CURRENT, VIR_DOMAIN_DEVICE_MODIFY_LIVE, VIR_DOMAIN_DEVICE_MODIFY_CONFIG, VIR_DOMAIN_DEVICE_MODIFY_FORCE)
  * @package YunInternet\Libvirt

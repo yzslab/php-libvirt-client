@@ -13,6 +13,7 @@ interface Constants
     const BUS_DEVICE_PREFIX = [
         "virtio" => "vd",
         "scsi" => "sd",
+        "sata" => "sd",
         "ide" => "hd",
         "fdc" => "fd",
     ];

@@ -66,4 +66,10 @@ class DomainTest extends BaseConnectionTestCase
 
         $this->assertTrue(true);
     }
+
+    public function testGetDiskDevices()
+    {
+        var_dump($this->domains[0]->libvirt_domain_get_disk_devices());
+        $this->assertTrue(true);
+    }
 }
