@@ -92,6 +92,16 @@ class OS extends SimpleXMLImplement
     }
 
     /**
+     * @param bool $readonly
+     * @return $this
+     */
+    public function setLoaderReadonly($readonly)
+    {
+        $this->loader()->setAttribute("readonly", $readonly ? "yes" : "no");
+        return $this;
+    }
+
+    /**
      * @param array $bootDevices
      * @return $this
      */
