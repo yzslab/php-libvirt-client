@@ -19,7 +19,7 @@ enum virDomainUndefineFlagsValues {
     Keep nvram file Future undefine control flags should come here.
 }
 */
-bool libvirt_domain_undefine_flags(int $flags = 0)
+bool libvirt_domain_undefine_flags(resource $domain, int $flags = 0)
 ```
 
 Example patch step:
