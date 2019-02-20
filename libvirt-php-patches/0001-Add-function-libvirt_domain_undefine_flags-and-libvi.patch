@@ -1,0 +1,311 @@
+From e753d0014e8ce8cbcafb0fbd92159a6cc9f32168 Mon Sep 17 00:00:00 2001
+From: Zhensheng Yuan <yuan@zhensheng.im>
+Date: Wed, 20 Feb 2019 18:25:05 +0800
+Subject: [libvirt-php PATCH] Add function libvirt_domain_undefine_flags and
+ libvirt_domain_snapshot_create_xml
+
+---
+ ...lags_and_snapshot_create_xml_test_case.php | 136 ++++++++++++++++++
+ src/libvirt-domain.c                          |  23 +++
+ src/libvirt-domain.h                          |   2 +
+ src/libvirt-php.c                             |  12 ++
+ src/libvirt-snapshot.c                        |  35 +++++
+ src/libvirt-snapshot.h                        |   2 +
+ 6 files changed, 210 insertions(+)
+ create mode 100644 examples/domain_undefine_flags_and_snapshot_create_xml_test_case.php
+
+diff --git a/examples/domain_undefine_flags_and_snapshot_create_xml_test_case.php b/examples/domain_undefine_flags_and_snapshot_create_xml_test_case.php
+new file mode 100644
+index 0000000..e6590ae
+--- /dev/null
++++ b/examples/domain_undefine_flags_and_snapshot_create_xml_test_case.php
+@@ -0,0 +1,136 @@
++<?php
++/**
++ * Created by PhpStorm.
++ * Date: 19-2-20
++ * Time: 下午4:57
++ */
++
++namespace YunInternet\Libvirt\Test\Unit;
++
++
++use PHPUnit\Framework\TestCase;
++
++class Test_libvirt_domain_undefine_flags extends TestCase
++{
++    public function testConstants()
++    {
++        $this->assertEquals(VIR_DOMAIN_UNDEFINE_MANAGED_SAVE, 1);
++        $this->assertEquals(VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA, 2);
++        $this->assertEquals(VIR_DOMAIN_UNDEFINE_NVRAM, 4);
++        $this->assertEquals(VIR_DOMAIN_UNDEFINE_KEEP_NVRAM, 8);
++    }
++
++    public function testSnapshotAndUndefineFlags()
++    {
++        $libvirtResource = libvirt_connect("test:///default", false);
++        $this->assertTrue(is_resource($libvirtResource));
++
++        $domainResource = libvirt_domain_define_xml($libvirtResource, $this->getDomainXML());
++        $this->assertTrue(is_resource($domainResource));
++
++        // Create a snapshot named snapshot1
++        $snapshotResource = libvirt_domain_snapshot_create_xml($domainResource, <<<EOF
++<domainsnapshot>
++  <name>snapshot1</name>
++</domainsnapshot>
++EOF
++, VIR_SNAPSHOT_CREATE_LIVE | VIR_SNAPSHOT_CREATE_ATOMIC);
++        $this->assertTrue(is_resource($snapshotResource));
++
++        // Domain with snapshot can not be undefined directly
++        $this->assertFalse(@libvirt_domain_undefine($domainResource));
++
++        // Use VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA flag to undefine the domain
++        $this->assertTrue(libvirt_domain_undefine_flags($domainResource, VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA));
++    }
++
++    private function getDomainXML()
++    {
++        return <<<EOF
++<domain type="test">
++  <name>Test</name>
++  <memory unit="MiB">1024</memory>
++  <vcpu placement="static">8</vcpu>
++  <cpu mode="host-passthrough">
++    <topology sockets="4" cores="1" threads="2"/>
++  </cpu>
++  <os>
++    <type arch="i686">hvm</type>
++    <loader readonly='yes' type='pflash'>/usr/share/ovmf/OVMF.fd</loader>
++    <nvram template='/usr/share/OVMF/OVMF_VARS.fd'>/var/lib/libvirt/qemu/nvram/guest_VARS.fd</nvram>
++    <bootmenu enable="yes" timeout="1000"/>
++    <boot dev="hd"/>
++    <boot dev="cdrom"/>
++  </os>
++  <pm>
++    <suspend-to-mem enable="yes"/>
++  </pm>
++  <devices>
++    <memballoon model="none"/>
++    <disk type="volume" device="disk">
++      <driver name="qemu" type="qcow2"/>
++      <source pool="testPool1" volume="testVolume1"/>
++      <target bus="virtio" dev="vda"/>
++    </disk>
++    <disk type="volume" device="disk">
++      <driver name="qemu" type="qcow2"/>
++      <source pool="testPool2" volume="testVolume2"/>
++      <target bus="virtio" dev="vdb"/>
++      <iotune>
++        <total_bytes_sec>102400</total_bytes_sec>
++      </iotune>
++    </disk>
++    <disk type="file" device="cdrom">
++      <driver name="qemu" type="raw"/>
++      <source file="/iso/iso.iso"/>
++      <target bus="ide" dev="hda"/>
++    </disk>
++    <interface type="network">
++      <source network="default"/>
++      <mac address="52:54:00:00:00:01"/>
++      <model type="virtio"/>
++      <filterref filter="clean-traffic">
++        <parameter name="IP" value="192.168.122.2"/>
++      </filterref>
++      <bandwidth>
++        <inbound average="10240" burst="20480" peak="20480"/>
++        <outbound average="10240" burst="20480" peak="20480"/>
++      </bandwidth>
++    </interface>
++    <input type="tablet" bus="usb"/>
++    <graphics type="vnc" passwd="12345678" port="-1" autoport="yes">
++      <listen type="address" address="0.0.0.0"/>
++    </graphics>
++    <channel>
++      <source mode="bind"/>
++      <target type="virtio" name="org.qemu.guest_agent.0"/>
++    </channel>
++  </devices>
++  <clock offset="utc"/>
++  <features>
++    <pae/>
++    <acpi/>
++    <apic/>
++    <hyperv>
++      <relaxed state="on"/>
++      <vapic state="on"/>
++      <spinlocks state="on" retries="8191"/>
++    </hyperv>
++  </features>
++  <on_poweroff>destroy</on_poweroff>
++  <on_reboot>restart</on_reboot>
++  <on_crash>restart</on_crash>
++  <blkiotune>
++    <weight>1000</weight>
++    <device>
++      <path>/dev/sda</path>
++      <weight>1000</weight>
++      <read_bytes_sec>10240</read_bytes_sec>
++      <write_bytes_sec>10240</write_bytes_sec>
++    </device>
++  </blkiotune>
++</domain>
++EOF
++            ;
++    }
++}
+diff --git a/src/libvirt-domain.c b/src/libvirt-domain.c
+index 8b8bb45..e2dc33e 100644
+--- a/src/libvirt-domain.c
++++ b/src/libvirt-domain.c
+@@ -1467,6 +1467,29 @@ PHP_FUNCTION(libvirt_domain_undefine)
+     RETURN_TRUE;
+ }
+ 
++/*
++ * Function name:   libvirt_domain_undefine_flags
++ * Description:     Function is used to undefine(with flags) the domain identified by it's resource
++ * Arguments:       @res [resource]: libvirt domain resource, e.g. from libvirt_domain_lookup_by_*()
++ *                  @flags [int]: optional flags
++ * Returns:         TRUE for success, FALSE on error
++ */
++PHP_FUNCTION(libvirt_domain_undefine_flags)
++{
++    php_libvirt_domain *domain = NULL;
++    zval *zdomain;
++    int retval;
++    zend_long flags = 0;
++
++    GET_DOMAIN_FROM_ARGS("r|l", &zdomain, &flags);
++
++    retval = virDomainUndefineFlags(domain->domain, flags);
++    DPRINTF("%s: virDomainUndefineFlags(%p) returned %d\n", PHPFUNC, domain->domain, retval);
++    if (retval != 0)
++        RETURN_FALSE;
++    RETURN_TRUE;
++}
++
+ /*
+  * Function name:   libvirt_domain_reboot
+  * Since version:   0.4.1(-1)
+diff --git a/src/libvirt-domain.h b/src/libvirt-domain.h
+index dc0ab46..6d98544 100644
+--- a/src/libvirt-domain.h
++++ b/src/libvirt-domain.h
+@@ -73,6 +73,7 @@
+     PHP_FE(libvirt_domain_suspend,               arginfo_libvirt_conn)                         \
+     PHP_FE(libvirt_domain_managedsave,           arginfo_libvirt_conn)                         \
+     PHP_FE(libvirt_domain_undefine,              arginfo_libvirt_conn)                         \
++    PHP_FE(libvirt_domain_undefine_flags,        arginfo_libvirt_conn_flags)                   \
+     PHP_FE(libvirt_domain_reboot,                arginfo_libvirt_conn_flags)                   \
+     PHP_FE(libvirt_domain_define_xml,            arginfo_libvirt_conn_xml)                     \
+     PHP_FE(libvirt_domain_create_xml,            arginfo_libvirt_conn_xml)                     \
+@@ -163,6 +164,7 @@ PHP_FUNCTION(libvirt_domain_shutdown);
+ PHP_FUNCTION(libvirt_domain_suspend);
+ PHP_FUNCTION(libvirt_domain_managedsave);
+ PHP_FUNCTION(libvirt_domain_undefine);
++PHP_FUNCTION(libvirt_domain_undefine_flags);
+ PHP_FUNCTION(libvirt_domain_reboot);
+ PHP_FUNCTION(libvirt_domain_define_xml);
+ PHP_FUNCTION(libvirt_domain_create_xml);
+diff --git a/src/libvirt-php.c b/src/libvirt-php.c
+index cf8fd7f..7e10b3d 100644
+--- a/src/libvirt-php.c
++++ b/src/libvirt-php.c
+@@ -468,6 +468,12 @@ ZEND_ARG_INFO(0, timeout)
+ ZEND_ARG_INFO(0, flags)
+ ZEND_END_ARG_INFO()
+ 
++ZEND_BEGIN_ARG_INFO_EX(arginfo_libvirt_domain_snapshot_create_xml, 0, 0, 2)
++ZEND_ARG_INFO(0, conn)
++ZEND_ARG_INFO(0, xml)
++ZEND_ARG_INFO(0, flags)
++ZEND_END_ARG_INFO()
++
+ static zend_function_entry libvirt_functions[] = {
+     PHP_FE_LIBVIRT_CONNECTION
+     PHP_FE_LIBVIRT_STREAM
+@@ -1491,6 +1497,12 @@ PHP_MINIT_FUNCTION(libvirt)
+     REGISTER_LONG_CONSTANT("VIR_KEYCODE_SET_WIN32", VIR_KEYCODE_SET_WIN32, CONST_CS | CONST_PERSISTENT);
+     REGISTER_LONG_CONSTANT("VIR_KEYCODE_SET_RFB", VIR_KEYCODE_SET_RFB, CONST_CS | CONST_PERSISTENT);
+ 
++    /* virDomainUndefineFlagsValues */
++    REGISTER_LONG_CONSTANT("VIR_DOMAIN_UNDEFINE_MANAGED_SAVE", VIR_DOMAIN_UNDEFINE_MANAGED_SAVE, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA", VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("VIR_DOMAIN_UNDEFINE_NVRAM", VIR_DOMAIN_UNDEFINE_NVRAM, CONST_CS | CONST_PERSISTENT);
++    REGISTER_LONG_CONSTANT("VIR_DOMAIN_UNDEFINE_KEEP_NVRAM", VIR_DOMAIN_UNDEFINE_KEEP_NVRAM, CONST_CS | CONST_PERSISTENT);
++
+     REGISTER_INI_ENTRIES();
+ 
+     /* Initialize libvirt and set up error callback */
+diff --git a/src/libvirt-snapshot.c b/src/libvirt-snapshot.c
+index 1388d88..f7e3e2b 100644
+--- a/src/libvirt-snapshot.c
++++ b/src/libvirt-snapshot.c
+@@ -130,6 +130,41 @@ PHP_FUNCTION(libvirt_domain_snapshot_create)
+     VIRT_REGISTER_RESOURCE(res_snapshot, le_libvirt_snapshot);
+ }
+ 
++/*
++ * Function name:   libvirt_domain_snapshot_create_xml
++ * Description:     This function creates the domain snapshot from XML string for the domain identified by it's resource
++ * Arguments:       @res [resource]: libvirt domain resource
++ *                  @xml [string]: xml
++ *                  @flags [int]: libvirt snapshot flags
++ * Returns:         domain snapshot resource
++ */
++PHP_FUNCTION(libvirt_domain_snapshot_create_xml)
++{
++    php_libvirt_domain *domain = NULL;
++    php_libvirt_snapshot *res_snapshot;
++    zval *zdomain;
++    char *xml;
++    strsize_t xml_len;
++    virDomainSnapshotPtr snapshot = NULL;
++    zend_long flags = 0;
++
++    GET_DOMAIN_FROM_ARGS("rs|l", &zdomain, &xml, &xml_len, &flags);
++
++    snapshot = virDomainSnapshotCreateXML(domain->domain, xml, flags);
++    DPRINTF("%s: virDomainSnapshotCreateXML(%p, <xml>) returned %p\n", PHPFUNC, domain->domain, snapshot);
++    if (snapshot == NULL)
++        RETURN_FALSE;
++
++    res_snapshot = (php_libvirt_snapshot *)emalloc(sizeof(php_libvirt_snapshot));
++    res_snapshot->domain = domain;
++    res_snapshot->snapshot = snapshot;
++
++    DPRINTF("%s: returning %p\n", PHPFUNC, res_snapshot->snapshot);
++    resource_change_counter(INT_RESOURCE_SNAPSHOT, domain->conn->conn, res_snapshot->snapshot, 1 TSRMLS_CC);
++
++    VIRT_REGISTER_RESOURCE(res_snapshot, le_libvirt_snapshot);
++}
++
+ /*
+  * Function name:   libvirt_domain_snapshot_get_xml
+  * Since version:   0.4.1(-2)
+diff --git a/src/libvirt-snapshot.h b/src/libvirt-snapshot.h
+index e6092aa..970662c 100644
+--- a/src/libvirt-snapshot.h
++++ b/src/libvirt-snapshot.h
+@@ -16,6 +16,7 @@
+     PHP_FE(libvirt_domain_has_current_snapshot,    arginfo_libvirt_conn_optflags)                  \
+     PHP_FE(libvirt_domain_snapshot_lookup_by_name, arginfo_libvirt_domain_snapshot_lookup_by_name) \
+     PHP_FE(libvirt_domain_snapshot_create,         arginfo_libvirt_conn_optflags)                  \
++    PHP_FE(libvirt_domain_snapshot_create_xml,     arginfo_libvirt_domain_snapshot_create_xml)     \
+     PHP_FE(libvirt_domain_snapshot_get_xml,        arginfo_libvirt_conn_optflags)                  \
+     PHP_FE(libvirt_domain_snapshot_revert,         arginfo_libvirt_conn_optflags)                  \
+     PHP_FE(libvirt_domain_snapshot_delete,         arginfo_libvirt_conn_optflags)                  \
+@@ -50,6 +51,7 @@ void php_libvirt_snapshot_dtor(virt_resource *rsrc TSRMLS_DC);
+ PHP_FUNCTION(libvirt_domain_has_current_snapshot);
+ PHP_FUNCTION(libvirt_domain_snapshot_lookup_by_name);
+ PHP_FUNCTION(libvirt_domain_snapshot_create);
++PHP_FUNCTION(libvirt_domain_snapshot_create_xml);
+ PHP_FUNCTION(libvirt_domain_snapshot_get_xml);
+ PHP_FUNCTION(libvirt_domain_snapshot_revert);
+ PHP_FUNCTION(libvirt_domain_snapshot_delete);
+-- 
+2.17.1
+
