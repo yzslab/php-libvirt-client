@@ -14,7 +14,8 @@ namespace YunInternet\Libvirt;
  * @method string libvirt_domain_get_xml_desc($xpath, int $flags = 0)
  * @method array libvirt_domain_get_disk_devices()
  * @method array libvirt_domain_get_block_info(string $dev)
- * @method bool libvirt_domain_undefine($flags = 0)
+ * @method bool libvirt_domain_undefine()
+ * @method bool libvirt_domain_undefine_flags($flags = 0)
  * @method bool libvirt_domain_update_device(string $xml, int $flags = 0) $flags [int]:	Flags to update the device (VIR_DOMAIN_DEVICE_MODIFY_CURRENT, VIR_DOMAIN_DEVICE_MODIFY_LIVE, VIR_DOMAIN_DEVICE_MODIFY_CONFIG, VIR_DOMAIN_DEVICE_MODIFY_FORCE)
  * @method string|false libvirt_domain_qemu_agent_command(string $command, int $timeout = -1, int $flags = 0) $timeout for waiting (-2 block, -1 default, 0 no wait, >0 wait specific time
  * @package YunInternet\Libvirt
@@ -64,6 +65,7 @@ class Domain extends Libvirt
         "libvirt_domain_managedsave" => true,
         "libvirt_domain_suspend" => true,
         "libvirt_domain_undefine" => true,
+        "libvirt_domain_undefine_flags" => true,
         "libvirt_domain_reboot" => true,
         "libvirt_domain_memory_peek" => true,
         "libvirt_domain_memory_stats" => true,
@@ -85,6 +87,7 @@ class Domain extends Libvirt
         "libvirt_domain_has_current_snapshot" => true,
         "libvirt_domain_snapshot_lookup_by_name" => true,
         "libvirt_domain_snapshot_create" => true,
+        "libvirt_domain_snapshot_create_xml" => true,
         "libvirt_domain_snapshot_get_xml" => true,
         "libvirt_domain_snapshot_revert" => true,
         "libvirt_domain_snapshot_delete" => true,
