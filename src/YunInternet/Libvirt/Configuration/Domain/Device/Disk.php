@@ -19,7 +19,11 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract driver()
  * @method XMLElementContract source()
  * @method XMLElementContract target()
- * @method XMLElementContract readonly
+ * @method XMLElementContract readonly()
+ * @method XMLElementContract serial()
+ * @method XMLElementContract wwn()
+ * @method XMLElementContract vendor()
+ * @method XMLElementContract product()
  * @package YunInternet\Libvirt\Configuration\Domain\Device
  */
 class Disk extends SimpleXMLImplement
