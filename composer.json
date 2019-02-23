@@ -12,7 +12,7 @@
   ],
   "require": {
     "php": ">=7.0.0",
-    "ext-libvirt": "0.5.5",
+    "ext-libvirt": "*",
     "ext-simplexml": "*",
     "ext-dom": "*"
   },

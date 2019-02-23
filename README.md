@@ -1,6 +1,6 @@
 # Libvirt Client & XML Builder
 ## Requirements
-You need to patch libvirt-php(8626cb017de0a564fa95f5db0c71981a20319540) extension if you need these functions:
+You need to patch libvirt-php(8626cb017de0a564fa95f5db0c71981a20319540) extension, or use my forked libvirt-php(https://github.com/yzsme/libvirt-php.git) if you need these functions:
 ```
 resource libvirt_domain_snapshot_create_xml(resource $domain, string $xml, int $flags = 0)
 
@@ -22,12 +22,21 @@ enum virDomainUndefineFlagsValues {
 bool libvirt_domain_undefine_flags(resource $domain, int $flags = 0)
 ```
 
-Example patch step:
+### Example steps
+#### Use patch:
 ```
 git clone git://libvirt.org/libvirt-php.git
 cd libvirt-php
 git checkout 8626cb017de0a564fa95f5db0c71981a20319540
 patch -p1 < DIRECTORY_TO_PHP_LIBVIRT_CLIENT/libvirt-php-patches/0001-Add-function-libvirt_domain_undefine_flags-and-libvi.patch
+./autogen.sh
+make -j8
+make -j8 install
+```
+#### Use my forked and patched repository
+```
+git clone https://github.com/yzsme/libvirt-php.git
+cd libvirt-php
 ./autogen.sh
 make -j8
 make -j8 install
