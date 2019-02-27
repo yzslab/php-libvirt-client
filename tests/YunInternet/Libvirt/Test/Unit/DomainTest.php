@@ -78,4 +78,12 @@ class DomainTest extends BaseConnectionTestCase
         var_dump($this->domains[0]->libvirt_domain_qemu_agent_command(json_encode(["execute" => "guest-info"])));
         $this->assertTrue(true);
     }
+
+    public function testDomainIsActive()
+    {
+        var_dump($this->domains[0]->libvirt_domain_is_active());
+        var_dump($this->domains[0]->libvirt_domain_destroy());
+        var_dump($this->domains[0]->libvirt_domain_is_active());
+        $this->assertTrue(true);
+    }
 }
