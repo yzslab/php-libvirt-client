@@ -9,6 +9,7 @@ namespace YunInternet\Libvirt\Test\Unit;
 
 
 use YunInternet\Libvirt\Constants\Domain\VirDomainXMLFlags;
+use YunInternet\Libvirt\Libvirt;
 use YunInternet\Libvirt\Test\BaseConnectionTestCase;
 
 class DomainTest extends BaseConnectionTestCase
@@ -61,7 +62,14 @@ class DomainTest extends BaseConnectionTestCase
     public function testDomainCreate()
     {
         foreach ($this->domains as $domain) {
-            var_dump($domain->libvirt_domain_create());
+            try {
+                var_dump($domain->libvirt_domain_create());
+            } catch (\Exception $e) {
+            }
+
+            var_dump(Libvirt::getLastError());
+            var_dump(Libvirt::getLastVirErrorNumber());
+            var_dump(Libvirt::getLastVirErrorDomain());
         }
 
         $this->assertTrue(true);

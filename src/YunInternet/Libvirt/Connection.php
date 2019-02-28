@@ -64,21 +64,30 @@ class Connection extends Libvirt
 
     private $uri;
 
-    private $username;
+    private $readonly;
 
-    private $password;
+    private $credentials;
 
     private $libvirtResource;
 
-
-    public function __construct($uri, $username = null, $password = null)
+    /**
+     * Connection constructor.
+     * @param $uri
+     * @param bool $readonly
+     * @param null $credentials
+     * @throws CertificateNotTrustedException
+     * @throws Exception
+     */
+    public function __construct($uri, $readonly = false, $credentials = null)
     {
         $this->uri = $uri;
-        $this->username = $username;
-        $this->password = $password;
+        $this->readonly = $readonly;
+        $this->credentials = $credentials;
+
 
         try {
-            if (is_null($this->libvirtResource = $this->connect()))
+            $this->libvirtResource = $this->createConnection();
+            if (!$this->libvirtResource)
                 Libvirt::errorHandler();
         } catch (\ErrorException $e) {
             Libvirt::errorHandler($e->getMessage());
@@ -132,19 +141,10 @@ class Connection extends Libvirt
         return [$this->libvirtResource];
     }
 
-    private function connect()
+    protected function createConnection()
     {
-        if (empty($this->username) && empty($this->password)) {
-            return libvirt_connect($this->uri, false);
-        }
-        return libvirt_connect($this->uri, false, $this->createCredentials());
-    }
-
-    /**
-     * @return array
-     */
-    private function createCredentials() : array
-    {
-        return [VirConnectCredentialType::VIR_CRED_AUTHNAME => $this->username, VirConnectCredentialType::VIR_CRED_PASSPHRASE => $this->password];
+        if (is_array($this->credentials))
+            return \libvirt_connect($this->uri, $this->readonly, $this->credentials);
+        return \libvirt_connect($this->uri, $this->readonly);
     }
 }

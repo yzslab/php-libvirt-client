@@ -29,4 +29,6 @@ interface ErrorCode
     const DOMAIN_NOT_FOUND = 10020;
 
     const STORAGE_VOLUME_NOT_FOUND = 10021;
+
+    const DOMAIN_IS_ALREADY_RUNNING = 10022;
 }

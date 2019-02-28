@@ -62,6 +62,24 @@ abstract class Libvirt
     }
 
     /**
+     * Patch version libvirt-php required
+     * @return int The error code, a virErrorNumber, https://libvirt.org/html/libvirt-virterror.html#virErrorNumber
+     */
+    public static function getLastVirErrorNumber()
+    {
+        return \libvirt_get_last_error_code();
+    }
+
+    /**
+     * Patch version libvirt-php required
+     * @return int What part of the library raised this error, https://libvirt.org/html/libvirt-virterror.html#virErrorDomain
+     */
+    public static function getLastVirErrorDomain()
+    {
+        return \libvirt_get_last_error_domain();
+    }
+
+    /**
      * @param null|string $message
      * @throws LibvirtException
      * @throws CertificateNotTrustedException
@@ -96,6 +114,8 @@ abstract class Libvirt
             $errorCode = ErrorCode::DOMAIN_NOT_FOUND;
         else if (self::isErrorMessageContainString($message, "Storage volume not found:"))
             $errorCode = ErrorCode::STORAGE_VOLUME_NOT_FOUND;
+        else if (self::isErrorMessageContainString($message, "domain is already running"))
+            $errorCode = ErrorCode::DOMAIN_IS_ALREADY_RUNNING;
 
         throw new LibvirtException($message, $errorCode);
     }
