@@ -86,4 +86,9 @@ class DomainTest extends BaseConnectionTestCase
         var_dump($this->domains[0]->libvirt_domain_is_active());
         $this->assertTrue(true);
     }
+
+    public function testDomainReset()
+    {
+        $this->assertTrue($this->domains[0]->libvirt_domain_reset());
+    }
 }

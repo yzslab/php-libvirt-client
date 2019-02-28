@@ -10,6 +10,8 @@ namespace YunInternet\Libvirt;
 /**
  * Class Domain
  * @method bool libvirt_domain_create()
+ * @method bool libvirt_domain_reboot($flags = 0)
+ * @method bool libvirt_domain_reset($flags = 0)
  * @method bool libvirt_domain_destroy()
  * @method string libvirt_domain_get_xml_desc($xpath, int $flags = 0)
  * @method array libvirt_domain_get_disk_devices()
@@ -68,6 +70,7 @@ class Domain extends Libvirt
         "libvirt_domain_undefine" => true,
         "libvirt_domain_undefine_flags" => true,
         "libvirt_domain_reboot" => true,
+        "libvirt_domain_reset" => true,
         "libvirt_domain_memory_peek" => true,
         "libvirt_domain_memory_stats" => true,
         "libvirt_domain_update_device" => true,
