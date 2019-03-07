@@ -64,7 +64,7 @@ class OS extends SimpleXMLImplement
 
     public function setMachine($machine)
     {
-        $this->type()->setAttribute("machine", "q35");
+        $this->type()->setAttribute("machine", $machine);
         return $this;
     }
 
