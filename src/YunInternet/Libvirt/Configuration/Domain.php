@@ -9,6 +9,7 @@ namespace YunInternet\Libvirt\Configuration;
 
 
 use YunInternet\Libvirt\Configuration\Domain\BlockIOTune;
+use YunInternet\Libvirt\Configuration\Domain\Clock;
 use YunInternet\Libvirt\Configuration\Domain\CPU;
 use YunInternet\Libvirt\Configuration\Domain\Device;
 use YunInternet\Libvirt\Configuration\Domain\OS;
@@ -20,7 +21,6 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
 /**
  * Class Domain
- * @method  XMLElementContract clock()
  * @method XMLElementContract uuid()
  * @method XMLElementContract features()
  * @method XMLElementContract on_poweroff()
@@ -107,7 +107,17 @@ class Domain extends SimpleXMLImplement
 
         $this->device = new Device($this->getSimpleXMLElement()->addChild("devices"));
 
-        $this->clock()->setAttribute("offset", "utc");
+        $this->clock()
+            ->addTimer("rtc", function (SimpleXMLImplement $timer) {
+                $timer->setAttribute("tickpolicy", "catchup");
+            })
+            ->addTimer("pit", function (SimpleXMLImplement $timer) {
+                $timer->setAttribute("tickpolicy", "delay");
+            })
+            ->addTimer("hpet", function (SimpleXMLImplement $timer) {
+                $timer->setAttribute("present", "no");
+            })
+        ;
 
         $this->powerManagement()
             ->setAllowSuspend2Memory(false)
@@ -217,26 +227,24 @@ class Domain extends SimpleXMLImplement
         return new SysInfo($this->getSimpleXMLElement()->addChild("sysinfo"));
     }
 
+    /**
+     * @var Clock $clock
+     */
+    private $clock;
+
+    public function clock()
+    {
+        if (is_null($this->clock))
+            $this->clock = new Clock("utc", $this->getSimpleXMLElement()->addChild("clock"));
+        return $this->clock;
+    }
+
     private function initFeatures()
     {
 
         $this->features()
-            ->createChild("pae")
             ->createChild("acpi")
             ->createChild("apic")
         ;
-
-        $this->features()->addChild("hyperv", null, function (XMLElementContract $feature) {
-            $feature
-                ->createChild("relaxed", null, ["state" => "on"])
-                ->createChild("vapic", null, ["state" => "on"])
-                ->createChild("spinlocks", null, ["state" => "on", "retries" => "8191"])
-            ;
-        });
-    }
-
-    private static function createXMLElement() : XMLElementContract
-    {
-        return SimpleXMLImplement::newDomainXML();
     }
 }
