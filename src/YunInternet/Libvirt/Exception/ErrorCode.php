@@ -31,4 +31,13 @@ interface ErrorCode
     const STORAGE_VOLUME_NOT_FOUND = 10021;
 
     const DOMAIN_IS_ALREADY_RUNNING = 10022;
+
+    const DOMAIN_IS_NOT_RUNNING = 10023;
+
+
+    const DISK_NOT_FOUND = 20001;
+
+    const VNC_GRAPHIC_NOT_FOUND = 20002;
+
+    const VNC_DISPLAY_PORT_NOT_FOUND = 20003;
 }

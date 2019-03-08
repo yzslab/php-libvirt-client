@@ -7,6 +7,10 @@
 
 namespace YunInternet\Libvirt;
 
+use YunInternet\Libvirt\Constants\Domain\VirDomainXMLFlags;
+use YunInternet\Libvirt\Exception\DomainException;
+use YunInternet\Libvirt\Exception\ErrorCode;
+
 /**
  * Class Domain
  * @method bool libvirt_domain_create()
@@ -108,9 +112,65 @@ class Domain extends Libvirt
         $this->connection = $connection;
     }
 
-    protected function getResources($functionName)
+    /**
+     * @throws DomainException
+     */
+    public function vncDisplay()
     {
-        return [$this->domainResource];
+        if (!$this->libvirt_domain_is_active())
+            throw new DomainException("domain is not running", ErrorCode::DOMAIN_IS_NOT_RUNNING);
+        $vncGraphic = $this->findVNCGraphical();
+        $port = intval(@$vncGraphic["port"]);
+        if ($port <= 0)
+            throw new DomainException("vnc port not found", ErrorCode::VNC_DISPLAY_PORT_NOT_FOUND);
+        return $port;
+    }
+
+    /**
+     * @param $password
+     * @return bool
+     * @throws DomainException
+     */
+    public function setVNCPassword($password)
+    {
+        $vncGraphic = $this->findVNCGraphical();
+
+        // Set password
+        $vncGraphic["passwd"] = $password;
+
+        return $this->libvirt_domain_update_device($vncGraphic->asXML(), $this->returnLiveTagOnInstanceRunning() | VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+    }
+
+
+    /**
+     * @param null $xpath
+     * @param $flags
+     * @return \SimpleXMLElement
+     */
+    public function domainSimpleXMLElement($xpath = null, $flags = VirDomainXMLFlags::VIR_DOMAIN_XML_SECURE)
+    {
+        return new \SimpleXMLElement($this->libvirt_domain_get_xml_desc($xpath, $flags));
+    }
+
+    /**
+     * @return int
+     */
+    public function returnLiveTagOnInstanceRunning()
+    {
+        if ($this->domain->libvirt_domain_is_active())
+            return VIR_DOMAIN_DEVICE_MODIFY_LIVE;
+        return 0;
+    }
+
+    /**
+     * @param int $flags
+     * @return int
+     */
+    public function enableLiveTagOnInstanceRunning($flags = 0)
+    {
+        if ($this->domain->libvirt_domain_is_active())
+            return VIR_DOMAIN_DEVICE_MODIFY_LIVE | $flags;
+        return $flags;
     }
 
     /**
@@ -127,5 +187,30 @@ class Domain extends Libvirt
     public function getConnection(): Connection
     {
         return $this->connection;
+    }
+
+    protected function getResources($functionName)
+    {
+        return [$this->domainResource];
+    }
+
+    /**
+     * @return \SimpleXMLElement|null
+     * @throws DomainException
+     */
+    private function findVNCGraphical()
+    {
+        $vncGraphic = null;
+        // Find graphic which type is vnc
+        foreach ($this->domainSimpleXMLElement()->devices->graphics as $vncGraphic) {
+            if ($vncGraphic["type"] === "vnc")
+                break;
+        }
+
+        // Throw exception on VNC graphic not found
+        if (is_null($vncGraphic))
+            throw new DomainException("VNC graphic not found", ErrorCode::VNC_GRAPHIC_NOT_FOUND);
+
+        return $vncGraphic;
     }
 }

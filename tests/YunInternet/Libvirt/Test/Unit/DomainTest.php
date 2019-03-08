@@ -95,6 +95,12 @@ class DomainTest extends BaseConnectionTestCase
         $this->assertTrue(true);
     }
 
+    public function testDomainVNCDisplay()
+    {
+        var_dump($this->domains[0]->vncDisplay());
+        $this->assertTrue(true);
+    }
+
     public function testDomainReset()
     {
         $this->assertTrue($this->domains[0]->libvirt_domain_reset());
