@@ -20,8 +20,10 @@ class NWFilterTest extends TestCase
 
     public function testListAllNWFilters()
     {
-        foreach ($this->connection()->listAllNWFilters() as $NWFilter)
+        foreach ($this->connection()->listAllNWFilters() as $NWFilter) {
             var_dump($NWFilter->libvirt_nwfilter_get_name());
+            var_dump($NWFilter->libvirt_nwfilter_get_xml_desc());
+        }
         $this->assertTrue(true);
     }
 
