@@ -1,6 +1,6 @@
 {
   "name": "yuninternet/php-libvirt-client",
-  "description": "libvirtd php client",
+  "description": "libvirtd php client, with xml builder & additional functions.",
   "keywords": ["libvirt", "php"],
   "license": "MIT",
   "authors": [
