@@ -40,4 +40,6 @@ interface ErrorCode
     const VNC_GRAPHIC_NOT_FOUND = 20002;
 
     const VNC_DISPLAY_PORT_NOT_FOUND = 20003;
+
+    const NW_FILTER_NOT_FOUND = 20005;
 }

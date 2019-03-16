@@ -157,7 +157,7 @@ class Domain extends Libvirt
      */
     public function returnLiveTagOnInstanceRunning()
     {
-        if ($this->domain->libvirt_domain_is_active())
+        if ($this->libvirt_domain_is_active())
             return VIR_DOMAIN_DEVICE_MODIFY_LIVE;
         return 0;
     }
@@ -168,7 +168,7 @@ class Domain extends Libvirt
      */
     public function enableLiveTagOnInstanceRunning($flags = 0)
     {
-        if ($this->domain->libvirt_domain_is_active())
+        if ($this->libvirt_domain_is_active())
             return VIR_DOMAIN_DEVICE_MODIFY_LIVE | $flags;
         return $flags;
     }

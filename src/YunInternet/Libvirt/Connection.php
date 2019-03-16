@@ -24,6 +24,12 @@ use YunInternet\Libvirt\Exception\LibvirtException as Exception;
  * @method string libvirt_connect_get_capabilities($xpath = null)
  * @method resource libvirt_storagepool_define_xml(string $xml)
  * @method resource libvirt_storagepool_lookup_by_name(string $name)
+ * @method resource|false libvirt_nwfilter_define_xml(string $xml) Function is used to define a new nwfilter based on the XML description
+ * @method resource|false libvirt_nwfilter_lookup_by_name(string $name)
+ * @method resource|false libvirt_nwfilter_lookup_by_uuid_string(string $uuid)
+ * @method resource|false libvirt_nwfilter_lookup_by_uuid(string $binaryUUID)
+ * @method resource[] libvirt_list_all_nwfilters()
+ * @method string[] libvirt_list_nwfilters()
  */
 class Connection extends Libvirt
 {
@@ -62,6 +68,13 @@ class Connection extends Libvirt
 
         "libvirt_storagepool_define_xml" => true,
         "libvirt_storagepool_lookup_by_name" => true,
+
+        "libvirt_nwfilter_define_xml" => true,
+        "libvirt_nwfilter_lookup_by_name" => true,
+        "libvirt_nwfilter_lookup_by_uuid_string" => true,
+        "libvirt_nwfilter_lookup_by_uuid" => true,
+        "libvirt_list_all_nwfilters" => true,
+        "libvirt_list_nwfilters" => true,
     ];
 
     private $uri;
@@ -142,6 +155,32 @@ class Connection extends Libvirt
     {
         $storagePoolResource = $this->libvirt_storagepool_lookup_by_name($name);
         return new StoragePool($storagePoolResource);
+    }
+
+    public function nwFilterDefineXML($xml)
+    {
+        return new NWFilter($this->libvirt_nwfilter_define_xml($xml));
+    }
+
+    public function nwFilterLookupByName($name)
+    {
+        return new NWFilter($this->libvirt_nwfilter_lookup_by_name($name));
+    }
+
+    public function nwFilterLookupByUUID($uuid)
+    {
+        return NEW NWFilter($this->libvirt_nwfilter_lookup_by_uuid_string($uuid));
+    }
+
+    /**
+     * @return NWFilter[]
+     */
+    public function listAllNWFilters()
+    {
+        $nwFilters = [];
+        foreach ($this->libvirt_list_all_nwfilters() as $nwFilter)
+            $nwFilters[] = new NWFilter($nwFilter);
+        return $nwFilters;
     }
 
     protected function getResources($functionName)

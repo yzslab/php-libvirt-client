@@ -118,6 +118,8 @@ abstract class Libvirt
             $errorCode = ErrorCode::DOMAIN_IS_ALREADY_RUNNING;
         else if (self::isErrorMessageContainString($message, "domain is not running"))
             $errorCode = ErrorCode::DOMAIN_IS_NOT_RUNNING;
+        else if (self::isErrorMessageContainString($message, "Network filter not found"))
+            $errorCode = ErrorCode::NW_FILTER_NOT_FOUND;
 
         throw new LibvirtException($message, $errorCode);
     }
