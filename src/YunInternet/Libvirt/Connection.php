@@ -30,6 +30,8 @@ use YunInternet\Libvirt\Exception\LibvirtException as Exception;
  * @method resource|false libvirt_nwfilter_lookup_by_uuid(string $binaryUUID)
  * @method resource[] libvirt_list_all_nwfilters()
  * @method string[] libvirt_list_nwfilters()
+ * @method resource libvirt_network_define_xml(string $xml)
+ * @method resource libvirt_network_get(string $name)
  */
 class Connection extends Libvirt
 {
@@ -65,6 +67,7 @@ class Connection extends Libvirt
         "libvirt_list_domain_resources" => true,
 
         "libvirt_network_define_xml" => true,
+        "libvirt_network_get" => true,
 
         "libvirt_storagepool_define_xml" => true,
         "libvirt_storagepool_lookup_by_name" => true,
@@ -181,6 +184,16 @@ class Connection extends Libvirt
         foreach ($this->libvirt_list_all_nwfilters() as $nwFilter)
             $nwFilters[] = new NWFilter($nwFilter);
         return $nwFilters;
+    }
+
+    public function networkDefineXML($xml)
+    {
+        return new Network($this->libvirt_network_define_xml($xml));
+    }
+
+    public function networkGet($name)
+    {
+        return new Network($this->libvirt_network_get($name));
     }
 
     protected function getResources($functionName)
