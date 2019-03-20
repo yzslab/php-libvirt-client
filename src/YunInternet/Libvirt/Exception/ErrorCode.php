@@ -34,6 +34,12 @@ interface ErrorCode
 
     const DOMAIN_IS_NOT_RUNNING = 10023;
 
+    const ANOTHER_PROCESS_USING_THE_IMAGE = 10025;
+
+    const NO_MORE_AVAILABLE_PCI_SLOTS = 10026;
+
+    const BUS_SATA_CAN_NOT_BE_HOT_PLUGGED = 10028;
+
 
     const DISK_NOT_FOUND = 20001;
 

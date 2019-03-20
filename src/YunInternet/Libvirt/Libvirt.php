@@ -120,6 +120,12 @@ abstract class Libvirt
             $errorCode = ErrorCode::DOMAIN_IS_NOT_RUNNING;
         else if (self::isErrorMessageContainString($message, "Network filter not found"))
             $errorCode = ErrorCode::NW_FILTER_NOT_FOUND;
+        else if (self::isErrorMessageContainString($message, "No more available PCI slots"))
+            $errorCode = ErrorCode::NO_MORE_AVAILABLE_PCI_SLOTS;
+        else if (self::isErrorMessageContainString($message, "Is another process using the image"))
+            $errorCode = ErrorCode::ANOTHER_PROCESS_USING_THE_IMAGE;
+        else if (self::isErrorMessageContainString($message, "bus 'sata' cannot be hotplugged"))
+            $errorCode = ErrorCode::BUS_SATA_CAN_NOT_BE_HOT_PLUGGED;
 
         throw new LibvirtException($message, $errorCode);
     }
