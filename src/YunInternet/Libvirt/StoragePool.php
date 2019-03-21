@@ -19,6 +19,8 @@ namespace YunInternet\Libvirt;
  * @method resource libvirt_storagevolume_lookup_by_name(string $name)
  * @method bool libvirt_storagepool_refresh()
  * @method string[] libvirt_storagepool_list_volumes()
+ * @method string libvirt_storagepool_get_uuid_string()
+ * @method bool libvirt_storagepool_build()
  * @package YunInternet\Libvirt
  */
 class StoragePool extends Libvirt
@@ -34,6 +36,8 @@ class StoragePool extends Libvirt
         "libvirt_storagepool_refresh" => true,
         "libvirt_storagevolume_lookup_by_name" => true,
         "libvirt_storagepool_list_volumes" => true,
+        "libvirt_storagepool_get_uuid_string" => true,
+        "libvirt_storagepool_build" => true,
     ];
 
     private $storagePoolResource;

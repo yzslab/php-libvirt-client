@@ -16,6 +16,7 @@ namespace YunInternet\Libvirt;
  * @method bool libvirt_network_set_active(int $flags)
  * @method string|false libvirt_network_get_xml_desc($xpath = null)
  * @method bool libvirt_network_set_autostart(int $flags)
+ * @method array libvirt_network_get_dhcp_leases($mac = null, $flags = 0)
  * @package YunInternet\Libvirt
  */
 class Network extends Libvirt
@@ -28,6 +29,7 @@ class Network extends Libvirt
         "libvirt_network_set_active" => true,
         "libvirt_network_get_xml_desc" => true,
         "libvirt_network_set_autostart" => true,
+        "libvirt_network_get_dhcp_leases" => true,
     ];
 
     private $networkResource;

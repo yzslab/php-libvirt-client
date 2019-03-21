@@ -28,7 +28,7 @@ class Source extends SimpleXMLImplement
 
     public function addDevice($path, $configuration = null)
     {
-        $device = $this->addChild("device");
+        $device = $this->addChild("device", null, ["path" => $path]);
 
         if (is_callable($configuration)) {
             $configuration($device);
