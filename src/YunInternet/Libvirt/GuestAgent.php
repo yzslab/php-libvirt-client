@@ -59,12 +59,29 @@ class GuestAgent
         return $this->guestAgentExecute("guest-network-get-interfaces");
     }
 
-    public function fileOpen($path, $mode)
+    /**
+     * @param $path
+     * @param $mode
+     * @param null $operator
+     * @return array|void
+     */
+    public function fileOpen($path, $mode, $operator = null)
     {
-        return $this->guestAgentExecute("guest-file-open", [
+        $response = $this->guestAgentExecute("guest-file-open", [
             "path" => $path,
             "mode" => $mode,
         ]);
+        if (is_callable($operator)) {
+            $handle = $response["return"];
+            try {
+                $operator($this, $handle);
+            } finally {
+                $this->fileFlush($handle);
+                $this->fileClose($handle);
+            }
+            return;
+        }
+        return $response;
     }
 
     public function fileWrite($handle, $content)
@@ -72,6 +89,13 @@ class GuestAgent
         return $this->guestAgentExecute("guest-file-write", [
             "handle" => $handle,
             "buf-b64" => base64_encode($content),
+        ]);
+    }
+
+    public function fileFlush($handle)
+    {
+        $this->guestAgentExecute("guest-file-flush", [
+            "handle" => $handle,
         ]);
     }
 
