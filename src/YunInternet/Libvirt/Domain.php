@@ -109,6 +109,8 @@ class Domain extends Libvirt
 
     private $connection;
 
+    private $guestAgent;
+
     public function __construct($domainResource, Connection $connection)
     {
         $this->domainResource = $domainResource;
@@ -143,6 +145,17 @@ class Domain extends Libvirt
         $vncGraphic["passwd"] = $password;
 
         return $this->libvirt_domain_update_device($vncGraphic->asXML(), $this->returnLiveTagOnInstanceRunning() | VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+    }
+
+
+    /**
+     * @return GuestAgent
+     */
+    public function getGuestAgent() : GuestAgent
+    {
+        if (is_null($this->guestAgent))
+            $this->guestAgent = new GuestAgent($this);
+        return $this->guestAgent;
     }
 
 
