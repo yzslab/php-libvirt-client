@@ -27,6 +27,9 @@ use YunInternet\Libvirt\Exception\ErrorCode;
  * @method string|false libvirt_domain_qemu_agent_command(string $command, int $timeout = -1, int $flags = 0) $timeout for waiting (-2 block, -1 default, 0 no wait, >0 wait specific time
  * @method bool libvirt_domain_attach_device(string $xml, int $flags = VIR_DOMAIN_AFFECT_LIVE)
  * @method bool libvirt_domain_detach_device(string $xml, int $flags = VIR_DOMAIN_AFFECT_LIVE)
+ * @method array|false libvirt_domain_get_network_info()
+ * @method array|false libvirt_domain_block_stats(string $device)
+ * @method array|false libvirt_domain_get_cpu_total_stats()
  * @package YunInternet\Libvirt
  */
 class Domain extends Libvirt
@@ -103,6 +106,7 @@ class Domain extends Libvirt
         "libvirt_domain_snapshot_delete" => true,
         "libvirt_domain_attach_device" => true,
         "libvirt_domain_detach_device" => true,
+        "libvirt_domain_get_cpu_total_stats" => true,
     ];
 
     private $domainResource;
