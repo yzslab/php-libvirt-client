@@ -48,4 +48,6 @@ interface ErrorCode
     const VNC_DISPLAY_PORT_NOT_FOUND = 20003;
 
     const NW_FILTER_NOT_FOUND = 20005;
+
+    const TARGET_ALREADY_EXISTS = 20006;
 }

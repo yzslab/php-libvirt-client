@@ -126,6 +126,8 @@ abstract class Libvirt
             $errorCode = ErrorCode::ANOTHER_PROCESS_USING_THE_IMAGE;
         else if (self::isErrorMessageContainString($message, "bus 'sata' cannot be hotplugged"))
             $errorCode = ErrorCode::BUS_SATA_CAN_NOT_BE_HOT_PLUGGED;
+        else if (self::isErrorMessageContainString($message, "Requested operation is not valid: target") && self::isErrorMessageContainString($message, "already exists"))
+            $errorCode = ErrorCode::TARGET_ALREADY_EXISTS;
 
         throw new LibvirtException($message, $errorCode);
     }
