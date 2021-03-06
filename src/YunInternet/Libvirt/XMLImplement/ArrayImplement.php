@@ -69,7 +69,7 @@ class ArrayImplement implements XMLElementContract
         return $this;
     }
 
-    public function deleteAttribute($name, $value)
+    public function deleteAttribute($name)
     {
         unset($this->attributes[$name]);
         return $this;
