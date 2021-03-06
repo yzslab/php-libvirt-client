@@ -30,6 +30,8 @@ class Channel extends SimpleXMLImplement
     public function __construct($type, \SimpleXMLElement $simpleXMLElement)
     {
         parent::__construct($simpleXMLElement);
+
+        $this->setType($type);
     }
 
     /**
