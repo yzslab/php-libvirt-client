@@ -14,10 +14,12 @@
     "php": ">=7.0.0",
     "ext-libvirt": "*",
     "ext-simplexml": "*",
-    "ext-dom": "*"
+    "ext-dom": "*",
+    "ext-json": "*"
   },
   "require-dev": {
-    "phpunit/phpunit": "^6"
+    "phpunit/phpunit": "^6",
+    "ext-json": "*"
   },
   "autoload": {
     "psr-4": {
