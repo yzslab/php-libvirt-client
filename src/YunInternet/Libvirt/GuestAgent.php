@@ -24,8 +24,9 @@ class GuestAgent
 
     public function sync($id = null)
     {
-        if (is_null($id))
+        if (is_null($id)) {
             $id = random_int(0x0, 0xFFFFFFFF);
+        }
         $response = $this->guestAgentExecute("guest-sync", ["id" => $id]);
         return $id === $response["return"];
     }
@@ -144,8 +145,9 @@ class GuestAgent
 
     public function guestAgentExecute($command, $arguments = null)
     {
-        if (is_null($arguments))
+        if (is_null($arguments)) {
             $arguments = new \stdClass();
+        }
         return $this->guestAgentCommand([
             "execute" => $command,
             "arguments" => $arguments,
@@ -154,8 +156,9 @@ class GuestAgent
 
     public function guestAgentCommand($command, $timeout = -1, int $flags = 0)
     {
-        if (is_array($command))
+        if (is_array($command)) {
             $command = json_encode($command);
+        }
         return json_decode($this->domain->libvirt_domain_qemu_agent_command($command, $timeout, $flags), true);
     }
 }

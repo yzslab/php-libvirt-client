@@ -114,10 +114,12 @@ class Disk extends SimpleXMLImplement
 
     public function setReadonly($enable)
     {
-        if ($enable)
+        if ($enable) {
             $this->readonly();
-        else
+        }
+        else {
             unset($this->getSimpleXMLElement()->readonly);
+        }
         return $this;
     }
 
@@ -125,8 +127,9 @@ class Disk extends SimpleXMLImplement
 
     public function IOTune()
     {
-        if (is_null($this->IOTune))
+        if (is_null($this->IOTune)) {
             $this->IOTune = new IOTune($this->getSimpleXMLElement()->addChild("iotune"));
+        }
         return $this->IOTune;
     }
 
@@ -134,8 +137,9 @@ class Disk extends SimpleXMLImplement
 
     public function address()
     {
-        if (is_null($this->address))
+        if (is_null($this->address)) {
             $this->address = new Address($this->getSimpleXMLElement()->addChild("address"));
+        }
         return $this->address;
     }
 }

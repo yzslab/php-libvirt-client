@@ -15,8 +15,9 @@ trait LibvirtDefaultConnection
     public function connection()
     {
         static $connection;
-        if (is_null($connection))
+        if (is_null($connection)) {
             $connection = new Connection("qemu:///system");
+        }
         return $connection;
     }
 }

@@ -32,15 +32,17 @@ class PowerManagement extends SimpleXMLImplement
 
     public function suspend2Mem()
     {
-        if (is_null($this->element))
+        if (is_null($this->element)) {
             $this->element = $this->addChild("suspend-to-mem");
+        }
         return $this->element;
     }
 
     public function suspend2Disk()
     {
-        if (is_null($this->element))
+        if (is_null($this->element)) {
             $this->element = $this->addChild("suspend-to-disk");
+        }
         return $this->element;
     }
 

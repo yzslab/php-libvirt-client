@@ -38,8 +38,9 @@ class StoragePool extends SimpleXMLImplement
 
     public function source()
     {
-        if (is_null($this->source))
+        if (is_null($this->source)) {
             $this->source = new Source($this->getSimpleXMLElement()->addChild("source"));
+        }
         return $this->source;
     }
 
@@ -47,8 +48,9 @@ class StoragePool extends SimpleXMLImplement
 
     public function target()
     {
-        if (is_null($this->target))
+        if (is_null($this->target)) {
             $this->target = new Target($this->getSimpleXMLElement()->addChild("target"));
+        }
         return $this->target;
     }
 }

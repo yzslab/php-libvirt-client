@@ -15,8 +15,9 @@ trait LibvirtTestConnection
     public function connection()
     {
         static $connection;
-        if (is_null($connection))
+        if (is_null($connection)) {
             $connection = new Connection("test:///default");
+        }
         return $connection;
     }
 }

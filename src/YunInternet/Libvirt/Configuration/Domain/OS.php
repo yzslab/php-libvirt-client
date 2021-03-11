@@ -108,8 +108,9 @@ class OS extends SimpleXMLImplement
     public function setBootDevices($bootDevices)
     {
         unset($this->getSimpleXMLElement()->boot);
-        foreach ($bootDevices as $bootDevice)
+        foreach ($bootDevices as $bootDevice) {
             $this->addChild("boot", null, ["dev" => $bootDevice]);
+        }
         return $this;
     }
 

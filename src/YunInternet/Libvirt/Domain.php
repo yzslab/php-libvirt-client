@@ -127,12 +127,14 @@ class Domain extends Libvirt
      */
     public function vncDisplay()
     {
-        if (!$this->libvirt_domain_is_active())
+        if (!$this->libvirt_domain_is_active()) {
             throw new DomainException("domain is not running", ErrorCode::DOMAIN_IS_NOT_RUNNING);
+        }
         $vncGraphic = $this->findVNCGraphical();
         $port = intval(@$vncGraphic["port"]);
-        if ($port <= 0)
+        if ($port <= 0) {
             throw new DomainException("vnc port not found", ErrorCode::VNC_DISPLAY_PORT_NOT_FOUND);
+        }
         return $port;
     }
 
@@ -157,8 +159,9 @@ class Domain extends Libvirt
      */
     public function getGuestAgent() : GuestAgent
     {
-        if (is_null($this->guestAgent))
+        if (is_null($this->guestAgent)) {
             $this->guestAgent = new GuestAgent($this);
+        }
         return $this->guestAgent;
     }
 
@@ -178,8 +181,9 @@ class Domain extends Libvirt
      */
     public function returnLiveTagOnInstanceRunning()
     {
-        if ($this->libvirt_domain_is_active())
+        if ($this->libvirt_domain_is_active()) {
             return VIR_DOMAIN_DEVICE_MODIFY_LIVE;
+        }
         return 0;
     }
 
@@ -189,8 +193,9 @@ class Domain extends Libvirt
      */
     public function enableLiveTagOnInstanceRunning($flags = 0)
     {
-        if ($this->libvirt_domain_is_active())
+        if ($this->libvirt_domain_is_active()) {
             return VIR_DOMAIN_DEVICE_MODIFY_LIVE | $flags;
+        }
         return $flags;
     }
 
@@ -224,13 +229,15 @@ class Domain extends Libvirt
         $vncGraphic = null;
         // Find graphic which type is vnc
         foreach ($this->domainSimpleXMLElement()->devices->graphics as $vncGraphic) {
-            if ($vncGraphic["type"] === "vnc")
+            if ($vncGraphic["type"] === "vnc") {
                 break;
+            }
         }
 
         // Throw exception on VNC graphic not found
-        if (is_null($vncGraphic))
+        if (is_null($vncGraphic)) {
             throw new DomainException("VNC graphic not found", ErrorCode::VNC_GRAPHIC_NOT_FOUND);
+        }
 
         return $vncGraphic;
     }

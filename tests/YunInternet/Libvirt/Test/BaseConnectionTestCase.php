@@ -37,8 +37,9 @@ abstract class BaseConnectionTestCase extends TestCase
         $this->username = @$_SERVER["USERNAME"];
         $this->password = @$_SERVER["PASSWORD"];
 
-        if (!isset($this->uri))
+        if (!isset($this->uri)) {
             $this->uri = "test:///default";
+        }
 
         $this->libvirtConnection = $this->createConnectionOrReuseExistsConnection();
     }

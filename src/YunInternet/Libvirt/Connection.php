@@ -105,8 +105,9 @@ class Connection extends Libvirt
 
         try {
             $this->libvirtResource = $this->createConnection();
-            if (!$this->libvirtResource)
+            if (!$this->libvirtResource) {
                 Libvirt::errorHandler();
+            }
         } catch (\ErrorException $e) {
             Libvirt::errorHandler($e->getMessage());
         }
@@ -181,8 +182,9 @@ class Connection extends Libvirt
     public function listAllNWFilters()
     {
         $nwFilters = [];
-        foreach ($this->libvirt_list_all_nwfilters() as $nwFilter)
+        foreach ($this->libvirt_list_all_nwfilters() as $nwFilter) {
             $nwFilters[] = new NWFilter($nwFilter);
+        }
         return $nwFilters;
     }
 
@@ -203,8 +205,9 @@ class Connection extends Libvirt
 
     protected function createConnection()
     {
-        if (is_array($this->credentials))
+        if (is_array($this->credentials)) {
             return \libvirt_connect($this->uri, $this->readonly, $this->credentials);
+        }
         return \libvirt_connect($this->uri, $this->readonly);
     }
 }

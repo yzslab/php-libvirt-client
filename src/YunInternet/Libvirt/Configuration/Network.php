@@ -59,8 +59,9 @@ class Network extends SimpleXMLImplement
 
     public function forward()
     {
-        if (is_null($this->forward))
+        if (is_null($this->forward)) {
             $this->forward = new Forward($this->getSimpleXMLElement()->addChild("forward"));
+        }
         return $this->forward;
     }
 
@@ -68,8 +69,9 @@ class Network extends SimpleXMLImplement
 
     public function bridge()
     {
-        if (is_null($this->bridge))
+        if (is_null($this->bridge)) {
             $this->bridge = new Bridge($this->getSimpleXMLElement()->addChild("bridge"));
+        }
         return $this->bridge;
     }
 
@@ -80,8 +82,9 @@ class Network extends SimpleXMLImplement
      */
     public function bandwidth()
     {
-        if (is_null($this->bandwidth))
+        if (is_null($this->bandwidth)) {
             $this->bandwidth = new Bandwidth($this->getSimpleXMLElement()->addChild("bandwidth"));
+        }
         return $this->bandwidth;
     }
 }

@@ -79,8 +79,9 @@ class StorageVolume extends SimpleXMLImplement
 
     public function target()
     {
-        if (is_null($this->target))
+        if (is_null($this->target)) {
             $this->target = new Target($this->getSimpleXMLElement()->addChild("target"));
+        }
         return $this->target;
     }
 }

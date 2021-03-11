@@ -75,8 +75,9 @@ class InterfaceDevice extends SimpleXMLImplement
      */
     public function bandwidth()
     {
-        if (is_null($this->bandwidth))
+        if (is_null($this->bandwidth)) {
             $this->bandwidth = new Bandwidth($this->getSimpleXMLElement()->addChild("bandwidth"));
+        }
         return $this->bandwidth;
     }
 }
