@@ -33,10 +33,12 @@ class ArrayImplement implements XMLElementContract
         $this->name = $name;
         $this->value = $value;
 
-        if (is_callable($attributes))
+        if (is_callable($attributes)) {
             $attributes($this);
-        else
+        }
+        else {
             $this->attributes = $attributes;
+        }
     }
 
     public function addChild($name, $value = null, $attributes = null): XMLElementContract

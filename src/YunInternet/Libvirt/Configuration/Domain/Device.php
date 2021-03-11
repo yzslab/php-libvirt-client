@@ -125,8 +125,9 @@ class Device extends SimpleXMLImplement
     {
         $this->addChannel("unix", function (Channel $channel) use (&$socketName, &$targetName) {
             $channel->source()->setAttribute("mode", "bind");
-            if (!is_null($socketName))
+            if (!is_null($socketName)) {
                 $channel->source()->setAttribute("path", "/var/lib/libvirt/qemu/$socketName.agent");
+            }
 
             $channel->target()
                 ->setAttribute("type", "virtio")

@@ -41,8 +41,9 @@ class Target extends SimpleXMLImplement
 
     public function permissions()
     {
-        if (is_null($this->permissions))
+        if (is_null($this->permissions)) {
             $this->permissions = new Permission($this->getSimpleXMLElement()->addChild("permissions"));
+        }
         return $this->permissions;
     }
 }

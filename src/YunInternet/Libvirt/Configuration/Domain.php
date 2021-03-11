@@ -217,8 +217,9 @@ class Domain extends SimpleXMLImplement
      */
     public function blkiotune()
     {
-        if (is_null($this->blkiotune))
+        if (is_null($this->blkiotune)) {
             $this->blkiotune = new BlockIOTune($this->getSimpleXMLElement()->addChild("blkiotune"));
+        }
         return $this->blkiotune;
     }
 
@@ -234,8 +235,9 @@ class Domain extends SimpleXMLImplement
 
     public function clock()
     {
-        if (is_null($this->clock))
+        if (is_null($this->clock)) {
             $this->clock = new Clock("utc", $this->getSimpleXMLElement()->addChild("clock"));
+        }
         return $this->clock;
     }
 

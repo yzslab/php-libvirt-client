@@ -29,8 +29,9 @@ abstract class QemuGuestAgentTest extends TestCase
         $networkInterfaces = $this->getQGA()->getNetworkInterfaces();
 
         foreach ($networkInterfaces["return"] as $networkInterface) {
-            if (array_key_exists("hardware-address", $networkInterface))
+            if (array_key_exists("hardware-address", $networkInterface)) {
                 var_dump($networkInterface["hardware-address"]);
+            }
         }
         $this->assertTrue(true);
     }

@@ -24,8 +24,9 @@ abstract class Libvirt
 
     public static function __callStatic($name, $arguments)
     {
-        if (!array_key_exists($name, static::WHITE_LIST_FUNCTIONS))
+        if (!array_key_exists($name, static::WHITE_LIST_FUNCTIONS)) {
             throw new LibvirtException("Unknown function " . $name, 10001);
+        }
         return call_user_func($name, ... $arguments);
     }
 
@@ -37,13 +38,15 @@ abstract class Libvirt
      */
     public function __call($name, $arguments)
     {
-        if (!array_key_exists($name, static::WHITE_LIST_FUNCTIONS))
+        if (!array_key_exists($name, static::WHITE_LIST_FUNCTIONS)) {
             throw new LibvirtException("Unknown function " . $name, 10001);
+        }
 
         try {
             $returnResult = call_user_func($name, ... $this->getResources($name), ... $arguments);
-            if ($returnResult === false)
+            if ($returnResult === false) {
                 self::errorHandler();
+            }
             return $returnResult;
         } catch (\ErrorException $e) {
             self::errorHandler();
@@ -86,48 +89,67 @@ abstract class Libvirt
      */
     public static function errorHandler($message = null)
     {
-        if (is_null($message))
+        if (is_null($message)) {
             $message = static::getLastError();
+        }
         // Not an error
-        if (is_null($message))
+        if (is_null($message)) {
             return;
+        }
 
         $errorCode = 0;
 
-        if (self::isErrorMessageContainString($message, "certificate is not trusted"))
+        if (self::isErrorMessageContainString($message, "certificate is not trusted")) {
             throw new CertificateNotTrustedException($message, ErrorCode::CERTIFICATE_NOT_TRUSTED);
-        if (self::isErrorMessageContainString($message, "Unable to import client certificate"))
+        }
+        if (self::isErrorMessageContainString($message, "Unable to import client certificate")) {
             $errorCode = ErrorCode::UNABLE_IMPORT_CLIENT_CERTIFICATE;
-        else if (self::isErrorMessageContainString($message, "Unable to set x509 key and certificate"))
+        }
+        else if (self::isErrorMessageContainString($message, "Unable to set x509 key and certificate")) {
             $errorCode = ErrorCode::UNABLE_SET_X509_KEY_AND_CERTIFICATE;
-        else if (self::isErrorMessageContainString($message, "Failed to verify peer's certificate"))
+        }
+        else if (self::isErrorMessageContainString($message, "Failed to verify peer's certificate")) {
             $errorCode = ErrorCode::FAILED_TO_VERIFY_PEER_CERTIFICATE;
-        else if (self::isErrorMessageContainString($message, "The certificate hasn't got a known issuer"))
+        }
+        else if (self::isErrorMessageContainString($message, "The certificate hasn't got a known issuer")) {
             $errorCode = ErrorCode::CERTIFICATE_HAS_NOT_GOT_A_KNOWN_ISSUER;
-        else if (self::isErrorMessageContainString($message, "Unable to read TLS confirmation: Input/output error"))
+        }
+        else if (self::isErrorMessageContainString($message, "Unable to read TLS confirmation: Input/output error")) {
             $errorCode = ErrorCode::UNABLE_READ_TLS_CONFIRMATION;
-        else if (self::isErrorMessageContainString($message, "Storage pool not found:"))
+        }
+        else if (self::isErrorMessageContainString($message, "Storage pool not found:")) {
             $errorCode = ErrorCode::STORAGE_POOL_NOT_FOUND;
-        else if (self::isErrorMessageContainString($message, "Requested operation is not valid: storage pool '") && (self::isErrorMessageContainString($message, "' is already active") || self::isErrorMessageContainString($message, "' is active")))
+        }
+        else if (self::isErrorMessageContainString($message, "Requested operation is not valid: storage pool '") && (self::isErrorMessageContainString($message, "' is already active") || self::isErrorMessageContainString($message, "' is active"))) {
             $errorCode = ErrorCode::STORAGE_POOL_IS_ACTIVE;
-        else if (self::isErrorMessageContainString($message, "Domain not found"))
+        }
+        else if (self::isErrorMessageContainString($message, "Domain not found")) {
             $errorCode = ErrorCode::DOMAIN_NOT_FOUND;
-        else if (self::isErrorMessageContainString($message, "Storage volume not found:"))
+        }
+        else if (self::isErrorMessageContainString($message, "Storage volume not found:")) {
             $errorCode = ErrorCode::STORAGE_VOLUME_NOT_FOUND;
-        else if (self::isErrorMessageContainString($message, "domain is already running"))
+        }
+        else if (self::isErrorMessageContainString($message, "domain is already running")) {
             $errorCode = ErrorCode::DOMAIN_IS_ALREADY_RUNNING;
-        else if (self::isErrorMessageContainString($message, "domain is not running"))
+        }
+        else if (self::isErrorMessageContainString($message, "domain is not running")) {
             $errorCode = ErrorCode::DOMAIN_IS_NOT_RUNNING;
-        else if (self::isErrorMessageContainString($message, "Network filter not found"))
+        }
+        else if (self::isErrorMessageContainString($message, "Network filter not found")) {
             $errorCode = ErrorCode::NW_FILTER_NOT_FOUND;
-        else if (self::isErrorMessageContainString($message, "No more available PCI slots"))
+        }
+        else if (self::isErrorMessageContainString($message, "No more available PCI slots")) {
             $errorCode = ErrorCode::NO_MORE_AVAILABLE_PCI_SLOTS;
-        else if (self::isErrorMessageContainString($message, "Is another process using the image"))
+        }
+        else if (self::isErrorMessageContainString($message, "Is another process using the image")) {
             $errorCode = ErrorCode::ANOTHER_PROCESS_USING_THE_IMAGE;
-        else if (self::isErrorMessageContainString($message, "bus 'sata' cannot be hotplugged"))
+        }
+        else if (self::isErrorMessageContainString($message, "bus 'sata' cannot be hotplugged")) {
             $errorCode = ErrorCode::BUS_SATA_CAN_NOT_BE_HOT_PLUGGED;
-        else if (self::isErrorMessageContainString($message, "Requested operation is not valid: target") && self::isErrorMessageContainString($message, "already exists"))
+        }
+        else if (self::isErrorMessageContainString($message, "Requested operation is not valid: target") && self::isErrorMessageContainString($message, "already exists")) {
             $errorCode = ErrorCode::TARGET_ALREADY_EXISTS;
+        }
 
         throw new LibvirtException($message, $errorCode);
     }
