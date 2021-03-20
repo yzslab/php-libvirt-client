@@ -3,22 +3,6 @@
 You need use my patched libvirt-php(https://github.com/yzslab/libvirt-php.git) if you need these functions:
 ```
 resource libvirt_domain_snapshot_create_xml(resource $domain, string $xml, int $flags = 0)
-
-/*
-enum virDomainUndefineFlagsValues {
-    VIR_DOMAIN_UNDEFINE_MANAGED_SAVE	=	1 (0x1; 1 << 0)	
-    Also remove any managed save
-    
-    VIR_DOMAIN_UNDEFINE_SNAPSHOTS_METADATA	=	2 (0x2; 1 << 1)	
-    If last use of domain, then also remove any snapshot metadata
-    
-    VIR_DOMAIN_UNDEFINE_NVRAM	=	4 (0x4; 1 << 2)	
-    Also remove any nvram file
-    
-    VIR_DOMAIN_UNDEFINE_KEEP_NVRAM	=	8 (0x8; 1 << 3)	
-    Keep nvram file Future undefine control flags should come here.
-}
-*/
 bool libvirt_domain_undefine_flags(resource $domain, int $flags = 0)
 bool libvirt_domain_reset(resource $domain, int $flags = 0)
 
@@ -26,26 +10,10 @@ int libvirt_get_last_error_code()
 int libvirt_get_last_error_domain()
 
 array libvirt_network_get_dhcp_leases(string $mac = null, int $flags = 0)
+array libvirt_domain_get_cpu_total_stats()
 ```
 
-### Example steps
-#### Use patch:
-```
-DIRECTORY_TO_PHP_LIBVIRT_CLIENT="" # PLEASE CHANGE IT'S VALUE
-
-git clone git://libvirt.org/libvirt-php.git
-cd libvirt-php
-git checkout 8626cb017de0a564fa95f5db0c71981a20319540
-
-patch -p1 < ${DIRECTORY_TO_PHP_LIBVIRT_CLIENT}/libvirt-php-patches/0001-Add-function-libvirt_domain_undefine_flags-and-libvi.patch
-patch -p1 < ${DIRECTORY_TO_PHP_LIBVIRT_CLIENT}/libvirt-php-patches/0002-Add-libvirt_domain_reset-to-support-virDomainReset.patch
-patch -p1 < ${DIRECTORY_TO_PHP_LIBVIRT_CLIENT}/libvirt-php-patches/0003-Add-error-code-and-error-domain-support.patch
-
-./autogen.sh
-make -j8
-make -j8 install
-```
-#### Use my forked and patched repository
+### Patched libvirt-php installation steps
 ```
 git clone https://github.com/yzslab/libvirt-php.git
 cd libvirt-php
