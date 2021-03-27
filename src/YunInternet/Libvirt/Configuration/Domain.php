@@ -76,15 +76,22 @@ class Domain extends SimpleXMLImplement
 
     /**
      * Domain constructor.
+     * @param string $xml XML Domain or empty for new
+     */
+    public function __construct($xml = '<domain/>')
+    {
+        parent::__construct(new \SimpleXMLElement($xml));
+    }
+
+    /**
+     * Domain initializer.
      * @param string $name Domain name
      * @param int $memory MiB unit
      * @param int $maxAllocatedVCPU
      * @param string $type Domain type, e.g. kvm
      */
-    public function __construct($name, $memory, $maxAllocatedVCPU, $type = "kvm")
+    public function init($name, $memory, $maxAllocatedVCPU, $type = "kvm")
     {
-        parent::__construct(new \SimpleXMLElement("<domain/>"));
-
         $this->setType($type);
 
         $this->name = $this->addChild("name", $name);

@@ -241,4 +241,13 @@ class Domain extends Libvirt
 
         return $vncGraphic;
     }
+
+    /**
+     * @return Configuration\Domain
+     */
+    public function getDomain()
+    {
+        return new Configuration\Domain($this->libvirt_domain_get_xml_desc(''));
+    }
+
 }
