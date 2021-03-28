@@ -184,7 +184,7 @@ class Domain extends Libvirt
     public function getDiskCollectionByDevice($deviceType)
     {
         return $this->getDiskCollection(function (\SimpleXMLElement $disk) use ($deviceType) {
-            return @$disk["device"]->__toString() === $deviceType;
+            return $disk->target["dev"] && $disk["device"]->__toString() === $deviceType;
         });
     }
 
