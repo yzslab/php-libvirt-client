@@ -28,6 +28,12 @@ interface XMLElementContract
     public function createChild($name, $value = null, $attributes = null) : XMLElementContract;
 
     /**
+     * @param $name
+     * @return XMLElementContract Return parent element
+     */
+    public function removeChild($name) : XMLElementContract;
+
+    /**
      * @param mixed $value
      * @return XMLElementContract
      */
@@ -39,6 +45,12 @@ interface XMLElementContract
      * @return XMLElementContract
      */
     public function setAttribute($name, $value) : XMLElementContract;
+
+    /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getAttribute($name);
 
     /**
      * @return string
