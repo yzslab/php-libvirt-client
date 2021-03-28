@@ -104,7 +104,7 @@ phpunit
 ```
 ## Some configuration suggestions for Windows guest
 ```
-        $domainXML-->features()->hyperv()
+        $domainXML->features()->hyperv()
             ->setRelaxed(true)
             ->setVapic(true)
             ->setSpinLocks(true, 4095)
