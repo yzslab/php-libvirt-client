@@ -19,10 +19,15 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract source()
  * @method XMLElementContract mac()
  * @method XMLElementContract model()
+ * @method Bandwidth bandwidth()
  * @package YunInternet\Libvirt\Configuration\Domain\Device
  */
 class InterfaceDevice extends SimpleXMLImplement
 {
+    protected $singletonChildWrappers = [
+        "bandwidth" => Bandwidth::class,
+    ];
+
     use SingletonChild;
 
     public function __construct($type, \SimpleXMLElement $simpleXMLElement)
@@ -38,10 +43,20 @@ class InterfaceDevice extends SimpleXMLImplement
         return $this;
     }
 
+    public function getSourceNetwork()
+    {
+        return $this->source()->getAttribute("network");
+    }
+
     public function setSourceBridge($bridge)
     {
         $this->source()->setAttribute("bridge", $bridge);
         return $this;
+    }
+
+    public function getSourceBridge($bridge)
+    {
+        return $this->source()->getAttribute("bridge");
     }
 
     public function setMacAddress($macAddress)
@@ -50,10 +65,20 @@ class InterfaceDevice extends SimpleXMLImplement
         return $this;
     }
 
+    public function getMacAddress()
+    {
+        return $this->mac()->getAttribute("address");
+    }
+
     public function setModel($model)
     {
         $this->model()->setAttribute("type", $model);
         return $this;
+    }
+
+    public function getModel()
+    {
+        return $this->model()->getAttribute("type");
     }
 
     public function applyNWFilter($filter, $configuration = null)
@@ -66,18 +91,5 @@ class InterfaceDevice extends SimpleXMLImplement
         }
 
         return $NWFilter;
-    }
-
-    private $bandwidth;
-
-    /**
-     * @return Bandwidth
-     */
-    public function bandwidth()
-    {
-        if (is_null($this->bandwidth)) {
-            $this->bandwidth = new Bandwidth($this->getSimpleXMLElement()->addChild("bandwidth"));
-        }
-        return $this->bandwidth;
     }
 }
