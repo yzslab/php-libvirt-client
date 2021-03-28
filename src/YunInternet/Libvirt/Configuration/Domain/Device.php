@@ -17,20 +17,33 @@ use YunInternet\Libvirt\Configuration\Domain\Device\MemoryBalloon;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
+/**
+ * Class Device
+ * @method SimpleXMLImplement emulator()
+ * @method MemoryBalloon memballoon()
+ * @package YunInternet\Libvirt\Configuration\Domain
+ */
 class Device extends SimpleXMLImplement
 {
-    use SingletonChild;
+    protected $singletonChildWrappers = [
+        "memballoon" => MemoryBalloon::class,
+    ];
 
-    /**
-     * @var MemoryBalloon
-     */
-    private $memballoon;
+    use SingletonChild;
 
     public function __construct(\SimpleXMLElement $simpleXMLElement)
     {
         parent::__construct($simpleXMLElement);
+    }
 
-        $this->memballoon = new MemoryBalloon($this->getSimpleXMLElement()->addChild("memballoon"));
+    /**
+     * @param $emulator
+     * @return $this
+     */
+    public function setEmulator($emulator)
+    {
+        $this->emulator()->setValue($emulator);
+        return $this;
     }
 
     /**
@@ -152,15 +165,7 @@ class Device extends SimpleXMLImplement
 
     public function disableMemoryBalloon()
     {
-        $this->memballoon->setModel("none");
-        return;
-    }
-
-    /**
-     * @return MemoryBalloon
-     */
-    public function memballoon()
-    {
-        return $this->memballoon;
+        $this->memballoon()->setModel("none");
+        return $this;
     }
 }
