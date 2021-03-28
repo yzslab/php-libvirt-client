@@ -105,4 +105,52 @@ class DomainTest extends BaseConnectionTestCase
     {
         $this->assertTrue($this->domains[0]->libvirt_domain_reset());
     }
+
+    public function testChangeMedia()
+    {
+        $this->domains[0]->changeMedia("sda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
+        $this->assertEquals($this->domains[0]->getDiskByTargetDev("sda")->getSimpleXMLElement()->source["file"]->__toString(), "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
+        $this->domains[0]->changeMedia("sda", null);
+        $this->assertEquals($this->domains[0]->getDiskByTargetDev("sda")->getSimpleXMLElement()->source["file"], null);
+    }
+
+    public function testAddController()
+    {
+        $this->domains[0]->addController("scsi", "virtio-scsi");
+        $this->assertTrue(true);
+    }
+
+    public function testGetInterface()
+    {
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $mac = $collection[0]->getSimpleXMLElement()->mac["address"]->__toString();
+
+        $interface = $this->domains[0]->getInterfaceByMacAddress($mac);
+        $interface->setModel("e1000");
+        $this->domains[0]->libvirt_domain_update_device($interface->getXML(), VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $this->assertEquals($collection[0]->getSimpleXMLElement()->model["type"]->__toString(), "e1000");
+
+        $interface = $this->domains[0]->getInterfaceByMacAddress($mac);
+        $interface->setModel("virtio");
+        $this->domains[0]->libvirt_domain_update_device($interface->getXML(), VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $this->assertEquals($collection[0]->getSimpleXMLElement()->model["type"]->__toString(), "virtio");
+
+        $this->assertTrue(true);
+    }
+
+    public function testSetInterfaceModel()
+    {
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $mac = $collection[0]->getSimpleXMLElement()->mac["address"]->__toString();
+
+        $this->domains[0]->setInterfaceModel($mac, "e1000");
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $this->assertEquals($collection[0]->getSimpleXMLElement()->model["type"]->__toString(), "e1000");
+
+        $this->domains[0]->setInterfaceModel($mac, "virtio");
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $this->assertEquals($collection[0]->getSimpleXMLElement()->model["type"]->__toString(), "virtio");
+    }
 }

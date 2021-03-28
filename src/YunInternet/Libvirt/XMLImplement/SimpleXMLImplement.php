@@ -41,6 +41,11 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
+    public function removeChild($name): XMLElementContract
+    {
+        unset($this->simpleXMLElement->{$name});
+        return $this;
+    }
 
     public function setValue($value) : XMLElementContract
     {
@@ -65,17 +70,23 @@ class SimpleXMLImplement implements XMLElementContract
     public function getXML(): string
     {
         $XMLContent = $this->simpleXMLElement->asXML();
-        $lineBreakPosition = strpos($XMLContent, PHP_EOL);
-        return substr($XMLContent, $lineBreakPosition + 1);
+        self::removeXMLVersionElement($XMLContent);
+        return $XMLContent;
     }
 
     public function getFormattedXML()
     {
         $dom = dom_import_simplexml($this->getSimpleXMLElement())->ownerDocument;
         $dom->formatOutput = true;
-        $xmlContent = $dom->saveXML();
+        $XMLContent = $dom->saveXML();
+        self::removeXMLVersionElement($XMLContent);
+        return $XMLContent;
+    }
 
-        $lineBreakPosition = strpos($xmlContent, PHP_EOL);
-        return substr($xmlContent, $lineBreakPosition + 1);
+    private static function removeXMLVersionElement(&$xml)
+    {
+        if (strpos($xml, '<?xml version="') === 0) {
+            $xml = substr($xml, strpos($xml, ">") + 2);
+        }
     }
 }
