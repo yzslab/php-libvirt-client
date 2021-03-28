@@ -54,4 +54,6 @@ interface ErrorCode
     const TARGET_ALREADY_EXISTS = 20006;
 
     const INTERFACE_NOT_FOUND = 20008;
+
+    const INVALID_CONFIGURATION_CLASS = 20009;
 }

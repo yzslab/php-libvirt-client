@@ -112,6 +112,12 @@ class DomainTest extends BaseConnectionTestCase
     {
         $this->domains[0]->changeMedia("sda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
         $this->assertEquals($this->domains[0]->getDiskByTargetDev("sda")->getSimpleXMLElement()->source["file"]->__toString(), "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
+        $this->domains[0]->changeMedia("sda", function (Disk $disk) {
+            $disk
+                ->fileSource("/iso/iso.iso")
+                ->setDriverType("raw")
+            ;
+        });
         $this->domains[0]->changeMedia("sda", null);
         $this->assertEquals($this->domains[0]->getDiskByTargetDev("sda")->getSimpleXMLElement()->source["file"], null);
     }
@@ -199,6 +205,24 @@ class DomainTest extends BaseConnectionTestCase
                 ->setTargetBus("virtio")
             ;
         });
+        $this->domains[0]->detachDiskByTargetDev("vdb");
+        $this->assertTrue(true);
+    }
+
+    public function testGetConfigurationBuilder()
+    {
+        $configurationBuilder = $this->domains[0]->getConfigurationBuilder();
+        $configurationBuilder->devices()->addDisk("file", "disk", function (Disk $disk) {
+            $disk
+                ->setDriver("qemu")
+                ->setDriverType("qcow2")
+                ->setCache("none")
+                ->fileSource("/mnt/medias/sdb.qcow2")
+                ->setTargetDevice("vdb")
+                ->setTargetBus("virtio")
+            ;
+        });
+        $this->getLibvirtConnection()->domainDefineXML($configurationBuilder->getXML());
         $this->domains[0]->detachDiskByTargetDev("vdb");
         $this->assertTrue(true);
     }

@@ -12,6 +12,8 @@ use YunInternet\Libvirt\Configuration\Domain\BlockIOTune;
 use YunInternet\Libvirt\Configuration\Domain\Clock;
 use YunInternet\Libvirt\Configuration\Domain\CPU;
 use YunInternet\Libvirt\Configuration\Domain\Device;
+use YunInternet\Libvirt\Configuration\Domain\Feature;
+use YunInternet\Libvirt\Configuration\Domain\HyperV;
 use YunInternet\Libvirt\Configuration\Domain\OS;
 use YunInternet\Libvirt\Configuration\Domain\PowerManagement;
 use YunInternet\Libvirt\Configuration\Domain\SysInfo;
@@ -21,8 +23,17 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
 /**
  * Class Domain
+ * @method XMLElementContract name()
+ * @method XMLElementContract memory()
+ * @method XMLElementContract vcpu()
+ * @method CPU cpu()
+ * @method OS os()
+ * @method PowerManagement pm()
+ * @method Device devices()
+ * @method BlockIOTune blkiotune()
+ * @method Clock clock()
  * @method XMLElementContract uuid()
- * @method XMLElementContract features()
+ * @method Feature features()
  * @method XMLElementContract on_poweroff()
  * @method XMLElementContract on_reboot()
  * @method XMLElementContract on_crash()
@@ -30,49 +41,17 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  */
 class Domain extends SimpleXMLImplement
 {
+    protected $singletonChildWrappers = [
+        "cpu" => CPU::class,
+        "os" => OS::class,
+        "pm" => PowerManagement::class,
+        "devices" => Device::class,
+        "blkiotune" => BlockIOTune::class,
+        "clock" => Clock::class,
+        "features" => Feature::class,
+    ];
+
     use SingletonChild;
-
-    private $domain;
-
-    /**
-     * @var string $name
-     */
-    private $name;
-
-    /**
-     * @var int $memory MiB unit
-     */
-    private $memory;
-
-    /**
-     * @var int $maxAllocatedVCPU
-     */
-    private $maxAllocatedVCPU;
-
-    /**
-     * @var string $uuid
-     */
-    private $uuid;
-
-    /**
-     * @var CPU $cpu CPU section
-     */
-    private $cpu;
-
-    /**
-     * @var OS $os OS section
-     */
-    private $os;
-
-    /**
-     * @var PowerManagement
-     */
-    private $pm;
-
-    /**
-     * @var Device
-     */
-    private $device;
 
     /**
      * Domain constructor.
@@ -87,27 +66,20 @@ class Domain extends SimpleXMLImplement
 
         $this->setType($type);
 
-        $this->name = $this->addChild("name", $name);
+        $this->name()->setValue($name);
 
-        $this->memory = $this->addChild("memory", $memory, ["unit" => "MiB"]);
+        $this->memory()->setValue($memory)->setAttribute("unit", "MiB");
 
-        $this->maxAllocatedVCPU = $this->addChild("vcpu", $maxAllocatedVCPU, ["placement" => "static"]);
+        $this->vcpu()->setValue($maxAllocatedVCPU)->setAttribute("placement", "static");
 
-        $this->cpu = new CPU($this->getSimpleXMLElement()->addChild("cpu"));
-
-        $this->cpu
+        $this->cpu()
             ->setSocket(1)
             ->setCore($maxAllocatedVCPU)
             ->setThread(1)
         ;
 
-        $this->os = new OS($this->getSimpleXMLElement()->addChild("os"));
-
-        $this->pm = new PowerManagement($this->getSimpleXMLElement()->addChild("pm"));
-
-        $this->device = new Device($this->getSimpleXMLElement()->addChild("devices"));
-
         $this->clock()
+            ->setOffset("utc")
             ->addTimer("rtc", function (SimpleXMLImplement $timer) {
                 $timer->setAttribute("tickpolicy", "catchup");
             })
@@ -164,81 +136,19 @@ class Domain extends SimpleXMLImplement
     /**
      * @return PowerManagement
      */
-    public function pm()
-    {
-        return $this->pm;
-    }
-
-    /**
-     * @return PowerManagement
-     */
     public function powerManagement()
     {
-        return $this->pm;
-    }
-
-    /**
-     * @return CPU
-     */
-    public function cpu()
-    {
-        return $this->cpu;
-    }
-
-    /**
-     * @return OS
-     */
-    public function os()
-    {
-        return $this->os;
+        return $this->pm();
     }
 
     public function device()
     {
-        return $this->device;
-    }
-
-    public function devices()
-    {
-        return $this->device;
-    }
-
-    /**
-     * @return BlockIOTune
-     */
-    public function blockIOTune()
-    {
-        return $this->blkiotune();
-    }
-
-    private $blkiotune;
-    /**
-     * @return BlockIOTune
-     */
-    public function blkiotune()
-    {
-        if (is_null($this->blkiotune)) {
-            $this->blkiotune = new BlockIOTune($this->getSimpleXMLElement()->addChild("blkiotune"));
-        }
-        return $this->blkiotune;
+        return $this->devices();
     }
 
     public function sysinfo()
     {
         return new SysInfo($this->getSimpleXMLElement()->addChild("sysinfo"));
-    }
-
-    /**
-     * @var Clock $clock
-     */
-    private $clock;
-
-    public function clock()
-    {
-        if (is_null($this->clock)) {
-            $this->clock = new Clock("utc", $this->getSimpleXMLElement()->addChild("clock"));
-        }
-        return $this->clock;
     }
 
     private function initFeatures()

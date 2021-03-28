@@ -10,9 +10,9 @@ namespace YunInternet\Libvirt;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk;
 use YunInternet\Libvirt\Configuration\Domain\Device\InterfaceDevice;
 use YunInternet\Libvirt\Constants\Domain\VirDomainXMLFlags;
-use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\Exception\DomainException;
 use YunInternet\Libvirt\Exception\ErrorCode;
+use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 
 /**
  * Class Domain
@@ -212,7 +212,7 @@ class Domain extends Libvirt
      */
     public function attachDisk($type, $device, $builder, $flags = null)
     {
-        $disk = new Disk($type, $device, new \SimpleXMLElement("<disk/>"));
+        $disk = new Disk($type, $device);
         $builder($disk);
         $this->libvirt_domain_attach_device($disk->getXML(), $this->returnCommonFlagsOnNull($flags));
     }
@@ -375,6 +375,14 @@ class Domain extends Libvirt
     }
 
     /**
+     * @return Configuration\Domain
+     */
+    public function getConfigurationBuilder(): \YunInternet\Libvirt\Configuration\Domain
+    {
+        return self::createConfigurationWithXML(\YunInternet\Libvirt\Configuration\Domain::class, $this->domainSimpleXMLElement(VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE));
+    }
+
+    /**
      * @return mixed
      */
     public function getDomainResource()
@@ -446,16 +454,20 @@ class Domain extends Libvirt
     /**
      * @param $configurationClass
      * @param \SimpleXMLElement $simpleXMLElement
-     * @return XMLElementContract
-     * @throws \ReflectionException
+     * @return SimpleXMLImplement
+     * @throws DomainException
      */
-    private static function createConfigurationWithXML($configurationClass, \SimpleXMLElement $simpleXMLElement): XMLElementContract
+    private static function createConfigurationWithXML($configurationClass, \SimpleXMLElement $simpleXMLElement): SimpleXMLImplement
     {
-        $reflectionClass = new \ReflectionClass($configurationClass);
-        $simpleXMLElementProperty = $reflectionClass->getParentClass()->getProperty("simpleXMLElement");
-        $simpleXMLElementProperty->setAccessible(true);
-        $configuration = $reflectionClass->newInstanceWithoutConstructor();
-        $simpleXMLElementProperty->setValue($configuration, $simpleXMLElement);
-        return $configuration;
+        try {
+            $reflectionClass = new \ReflectionClass($configurationClass);
+            $simpleXMLElementProperty = $reflectionClass->getParentClass()->getProperty("simpleXMLElement");
+            $simpleXMLElementProperty->setAccessible(true);
+            $configuration = $reflectionClass->newInstanceWithoutConstructor();
+            $simpleXMLElementProperty->setValue($configuration, $simpleXMLElement);
+            return $configuration;
+        } catch (\ReflectionException $reflectionException) {
+            throw new DomainException("invalid configuration class " . $configurationClass, ErrorCode::INVALID_CONFIGURATION_CLASS);
+        }
     }
 }

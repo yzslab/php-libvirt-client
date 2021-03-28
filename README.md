@@ -104,23 +104,19 @@ phpunit
 ```
 ## Some configuration suggestions for Windows guest
 ```
-        ...->features()->addChild("hyperv", null, function (XMLElementContract $feature) {
-            $feature
-                ->createChild("relaxed", null, ["state" => "on"])
-                ->createChild("vapic", null, ["state" => "on"])
-                ->createChild("spinlocks", null, ["state" => "on", "retries" => "8191"])
-                ->createChild("vpindex", null, ["state" => "on"])
-                ->createChild("runtime", null, ["state" => "on"])
-                ->createChild("synic", null, ["state" => "on"])
-                ->createChild("stimer", null, ["state" => "on"])
-                ->createChild("reset", null, ["state" => "on"])
-            ;
-        });
+        $domainXML-->features()->hyperv()
+            ->setRelaxed(true)
+            ->setVapic(true)
+            ->setSpinLocks(true, 4095)
+            ->setVpindex(true)
+            ->setRuntime(true)
+            ->setSynic(true)
+            ->setStimer(true)
+            ->setReset(true);
         
-        ...->clock()
+        $domainXML->clock()
             ->setOffset("localtime")
             ->addTimer("hypervclock", function (SimpleXMLImplement $timer) {
                 $timer->setAttribute("present", "yes");
-            })
-        ;
+            });
 ```
