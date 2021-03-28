@@ -12,11 +12,9 @@ use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 
 class Clock extends SimpleXMLImplement
 {
-    public function __construct($offset, \SimpleXMLElement $simpleXMLElement)
+    public function __construct(\SimpleXMLElement $simpleXMLElement)
     {
         parent::__construct($simpleXMLElement);
-
-        $this->setOffset($offset);
     }
 
     public function setOffset($offset)
