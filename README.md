@@ -74,8 +74,14 @@ var_dump($domain->vncDisplay()); // Print VNC port
 $domain->setVNCPassword("87654321"); // Change VNC password
 
 // Change media
-$domain->changeMedia("sda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
-$domain->changeMedia("sda", null); // Eject
+$domain->changeMedia("hda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
+$domain->changeMedia("hda", function (Domain\Device\Disk $disk) {
+    $disk
+        ->fileSource("/iso/iso.iso")
+        ->setDriverType("raw")
+    ;
+});
+$domain->changeMedia("hda", null); // Eject
 
 // Attach disk to exists domain
 $domain->attachDisk("file", "disk", function (Disk $disk) {
