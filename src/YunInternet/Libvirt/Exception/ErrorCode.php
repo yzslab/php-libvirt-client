@@ -41,6 +41,8 @@ interface ErrorCode
     const BUS_SATA_CAN_NOT_BE_HOT_PLUGGED = 10028;
 
 
+    const INVALID_PARAMETER = 20000;
+
     const DISK_NOT_FOUND = 20001;
 
     const VNC_GRAPHIC_NOT_FOUND = 20002;
@@ -50,4 +52,6 @@ interface ErrorCode
     const NW_FILTER_NOT_FOUND = 20005;
 
     const TARGET_ALREADY_EXISTS = 20006;
+
+    const INTERFACE_NOT_FOUND = 20008;
 }

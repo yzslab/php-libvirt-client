@@ -58,7 +58,7 @@ $domainXML->device()
     ->useAbsoluteMousePointer()
     ->addVNCGraphic(function (Domain\Device\Graphic\VNCGraphic $VNCGraphic) {
         $VNCGraphic
-            ->setPassword("1234567890")
+            ->setPassword("12345678")
             ->useAutoPort()
             ->setListenAddress("0.0.0.0")
         ;
@@ -67,8 +67,35 @@ $domainXML->device()
 ;
 
 $connection = new YunInternet\Libvir\Connection("test:///default");
-$domainResource = $connection->libvirt_domain_define_xml($domainXML->getXML());
-// ...
+$domain = $connection->domainDefineXML($domainXML->getXML());
+$domain->libvirt_domain_create(); // Power on
+
+var_dump($domain->vncDisplay()); // Print VNC port
+$domain->setVNCPassword("87654321"); // Change VNC password
+
+// Change media
+$domain->changeMedia("hda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
+$domain->changeMedia("hda", function (Domain\Device\Disk $disk) {
+    $disk
+        ->fileSource("/iso/iso.iso")
+        ->setDriverType("raw")
+    ;
+});
+$domain->changeMedia("hda", null); // Eject
+
+// Attach disk to exists domain
+$domain->attachDisk("file", "disk", function (Disk $disk) {
+    $disk
+        ->setDriver("qemu")
+        ->setDriverType("qcow2")
+        ->setCache("none")
+        ->fileSource("/mnt/medias/sdb.qcow2")
+        ->setTargetDevice("vdb")
+        ->setTargetBus("virtio")
+    ;
+});
+// Detach disk
+$domain->detachDiskByTargetDev("vdb");
 ```
 ## More example
 In tests/YunInternet/Libvirt/Test：
