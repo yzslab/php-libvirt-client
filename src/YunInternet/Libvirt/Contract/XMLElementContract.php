@@ -47,6 +47,12 @@ interface XMLElementContract
     public function setAttribute($name, $value) : XMLElementContract;
 
     /**
+     * @param string $name
+     * @return string|null
+     */
+    public function getAttribute($name);
+
+    /**
      * @return string
      */
     public function getXML() : string;

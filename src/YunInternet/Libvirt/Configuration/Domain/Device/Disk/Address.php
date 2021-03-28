@@ -18,10 +18,20 @@ class Address extends SimpleXMLImplement
         return $this;
     }
 
+    public function getType()
+    {
+        return $this->getAttribute("type");
+    }
+
     public function setController($controller)
     {
         $this->setAttribute("controller", $controller);
         return $this;
+    }
+
+    public function getController()
+    {
+        return $this->getAttribute("controller");
     }
 
     public function setBus($bus)
@@ -30,15 +40,30 @@ class Address extends SimpleXMLImplement
         return $this;
     }
 
+    public function getBus()
+    {
+        return $this->getAttribute("bus");
+    }
+
     public function setTarget($target)
     {
         $this->setAttribute("target", $target);
         return $this;
     }
 
+    public function getTarget()
+    {
+        return $this->getAttribute("target");
+    }
+
     public function setUnit($unit)
     {
         $this->setAttribute("unit", $unit);
         return $this;
+    }
+
+    public function getUnit()
+    {
+        return $this->getAttribute("unit");
     }
 }

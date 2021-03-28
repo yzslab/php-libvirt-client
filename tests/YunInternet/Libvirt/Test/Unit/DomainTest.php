@@ -8,6 +8,8 @@
 namespace YunInternet\Libvirt\Test\Unit;
 
 
+use YunInternet\Libvirt\Configuration\Domain\Device\Disk;
+use YunInternet\Libvirt\Configuration\Domain\Device\InterfaceDevice\Bandwidth;
 use YunInternet\Libvirt\Constants\Domain\VirDomainXMLFlags;
 use YunInternet\Libvirt\Libvirt;
 use YunInternet\Libvirt\Test\BaseConnectionTestCase;
@@ -152,5 +154,52 @@ class DomainTest extends BaseConnectionTestCase
         $this->domains[0]->setInterfaceModel($mac, "virtio");
         $collection = $this->domains[0]->getInterfaceCollection();
         $this->assertEquals($collection[0]->getSimpleXMLElement()->model["type"]->__toString(), "virtio");
+    }
+
+    public function testSetInterfaceBandwidth()
+    {
+        $collection = $this->domains[0]->getInterfaceCollection();
+        $mac = $collection[0]->getSimpleXMLElement()->mac["address"]->__toString();
+
+        $values[] = [];
+        for ($i = 0; $i < 6; ++$i) {
+            $values[$i] = mt_rand(1000, 10000);
+        }
+
+        $this->domains[0]->setInterfaceBandwidth($mac, function (Bandwidth  $bandwidth) use ($values) {
+            $i = 0;
+            $bandwidth->setInboundAverage($values[$i++]);
+            $bandwidth->setInboundPeak($values[$i++]);
+            $bandwidth->setInboundBurst($values[$i++]);
+            $bandwidth->setOutboundAverage($values[$i++]);
+            $bandwidth->setOutboundPeak($values[$i++]);
+            $bandwidth->setOutboundBurst($values[$i++]);
+        });
+
+        $interface = $this->domains[0]->getInterfaceByMacAddress($mac);
+        $i = 0;
+        $this->assertEquals($interface->bandwidth()->inbound()->getAttribute("average"), $values[$i++]);
+        $this->assertEquals($interface->bandwidth()->inbound()->getAttribute("peak"), $values[$i++]);
+        $this->assertEquals($interface->bandwidth()->inbound()->getAttribute("burst"), $values[$i++]);
+        $this->assertEquals($interface->bandwidth()->outbound()->getAttribute("average"), $values[$i++]);
+        $this->assertEquals($interface->bandwidth()->outbound()->getAttribute("peak"), $values[$i++]);
+        $this->assertEquals($interface->bandwidth()->outbound()->getAttribute("burst"), $values[$i++]);
+        $this->assertTrue(true);
+    }
+
+    public function testDiskAttachAndDetach()
+    {
+        $this->domains[0]->attachDisk("file", "disk", function (Disk $disk) {
+            $disk
+                ->setDriver("qemu")
+                ->setDriverType("qcow2")
+                ->setCache("none")
+                ->fileSource("/mnt/medias/sdb.qcow2")
+                ->setTargetDevice("vdb")
+                ->setTargetBus("virtio")
+            ;
+        });
+        $this->domains[0]->detachDiskByTargetDev("vdb");
+        $this->assertTrue(true);
     }
 }

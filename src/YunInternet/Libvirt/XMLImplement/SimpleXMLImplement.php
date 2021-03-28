@@ -59,6 +59,11 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
+    public function getAttribute($name)
+    {
+        return $this->simpleXMLElement[$name] ? $this->simpleXMLElement[$name]->__toString() : null;
+    }
+
     /**
      * @return \SimpleXMLElement
      */

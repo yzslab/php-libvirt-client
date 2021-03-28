@@ -171,20 +171,21 @@ class Domain extends Libvirt
         }
         $diskCollection = [];
         foreach ($this->domainSimpleXMLElement(null, $inactive ? VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE : 0)->devices->disk as $disk) {
+            $disk = self::createConfigurationWithXML(Disk::class, $disk);
             $key = $filter($disk);
-            $this->add2CollectionBasedOnFilterResult($key, $diskCollection, Disk::class, $disk);
+            $this->add2CollectionBasedOnFilterResult($key, $diskCollection, $disk);
         }
         return $diskCollection;
     }
 
     /**
-     * @param string $deviceType
+     * @param string $device
      * @return Disk[]
      */
-    public function getDiskCollectionByDevice($deviceType)
+    public function getDiskCollectionByDevice($device)
     {
-        return $this->getDiskCollection(function (\SimpleXMLElement $disk) use ($deviceType) {
-            return $disk->target["dev"] && $disk["device"]->__toString() === $deviceType;
+        return $this->getDiskCollection(function (Disk $disk) use ($device) {
+            return $disk->getDevice() === $device;
         });
     }
 
@@ -194,13 +195,36 @@ class Domain extends Libvirt
      */
     public function getDiskByTargetDev($targetDev)
     {
-        $collection = $this->getDiskCollection(function (\SimpleXMLElement $disk) use ($targetDev) {
-            return $disk->target["dev"] && $disk->target["dev"]->__toString() === $targetDev;
+        $collection = $this->getDiskCollection(function (Disk $disk) use ($targetDev) {
+            return $disk->getTargetDevice() === $targetDev;
         });
         if (count($collection)) {
             return $collection[0];
         }
         throw new DomainException("target disk not found", ErrorCode::DISK_NOT_FOUND);
+    }
+
+    /**
+     * @param string $type
+     * @param string $device
+     * @param callable $builder
+     * @param null|int $flags
+     */
+    public function attachDisk($type, $device, $builder, $flags = null)
+    {
+        $disk = new Disk($type, $device, new \SimpleXMLElement("<disk/>"));
+        $builder($disk);
+        $this->libvirt_domain_attach_device($disk->getXML(), $this->returnCommonFlagsOnNull($flags));
+    }
+
+    /**
+     * @param string $targetDev
+     * @param null|int $flags
+     */
+    public function detachDiskByTargetDev($targetDev, $flags = null)
+    {
+        $disk = $this->getDiskByTargetDev($targetDev);
+        $this->libvirt_domain_detach_device($disk->getXML(), $this->returnCommonFlagsOnNull($flags));
     }
 
     /**
@@ -239,8 +263,9 @@ class Domain extends Libvirt
         }
         $interfaceCollection = [];
         foreach ($this->domainSimpleXMLElement(null, $inactive ? VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE : 0)->devices->interface as $interface) {
-            $key = $filter($interface);
-            $this->add2CollectionBasedOnFilterResult($key, $interfaceCollection, InterfaceDevice::class, $interface);
+            $interfaceDevice = self::createConfigurationWithXML(InterfaceDevice::class, $interface);
+            $key = $filter($interfaceDevice);
+            $this->add2CollectionBasedOnFilterResult($key, $interfaceCollection, $interfaceDevice);
         }
         return $interfaceCollection;
     }
@@ -252,8 +277,8 @@ class Domain extends Libvirt
      */
     public function getInterfaceByMacAddress($macAddress)
     {
-        $collection = $this->getInterfaceCollection(function (\SimpleXMLElement $interface) use ($macAddress) {
-            return $interface->mac["address"] && $interface->mac["address"]->__toString() === $macAddress;
+        $collection = $this->getInterfaceCollection(function (InterfaceDevice $interfaceDevice) use ($macAddress) {
+            return $interfaceDevice->getMacAddress() === $macAddress;
         });
         if (count($collection)) {
             return $collection[0];
@@ -271,6 +296,18 @@ class Domain extends Libvirt
         $interface = $this->getInterfaceByMacAddress($macAddress);
         $interface->setModel($model);
         $this->libvirt_domain_update_device($interface->getXML(), VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+    }
+
+    /**
+     * @param string $macAddress
+     * @param callable $setter
+     * @throws DomainException
+     */
+    public function setInterfaceBandwidth($macAddress, $setter)
+    {
+        $interface = $this->getInterfaceByMacAddress($macAddress);
+        $setter($interface->bandwidth());
+        $this->libvirt_domain_update_device($interface->getXML(), $this->getCommonFlags());
     }
 
     /**
@@ -385,12 +422,12 @@ class Domain extends Libvirt
         return $vncGraphic;
     }
 
-    private static function add2CollectionBasedOnFilterResult($filterResult, &$collection, $className, $xml)
+    private static function add2CollectionBasedOnFilterResult($filterResult, &$collection, $value)
     {
         if ($filterResult === true) {
-            $collection[] = self::createConfigurationWithXML($className, $xml);
+            $collection[] = $value;
         } else if (is_string($filterResult) || is_integer($filterResult)) {
-            $collection[$filterResult] = self::createConfigurationWithXML($className, $xml);
+            $collection[$filterResult] = $value;
         }
     }
 
