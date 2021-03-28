@@ -37,4 +37,15 @@ class Clock extends SimpleXMLImplement
         }
         return $timer;
     }
+
+    public function removeTimer($name)
+    {
+        $timer = $this->findChild("timer", function (SimpleXMLImplement $simpleXMLImplement) use ($name) {
+            return $simpleXMLImplement->getAttribute("name") === $name;
+        });
+        if ($timer) {
+            $this->removeChild($timer);
+        }
+        return $this;
+    }
 }

@@ -13,7 +13,6 @@ use YunInternet\Libvirt\Configuration\Domain\Clock;
 use YunInternet\Libvirt\Configuration\Domain\CPU;
 use YunInternet\Libvirt\Configuration\Domain\Device;
 use YunInternet\Libvirt\Configuration\Domain\Feature;
-use YunInternet\Libvirt\Configuration\Domain\HyperV;
 use YunInternet\Libvirt\Configuration\Domain\OS;
 use YunInternet\Libvirt\Configuration\Domain\PowerManagement;
 use YunInternet\Libvirt\Configuration\Domain\SysInfo;

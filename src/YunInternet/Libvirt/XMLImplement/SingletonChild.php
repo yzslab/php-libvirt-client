@@ -26,9 +26,13 @@ trait SingletonChild
     {
         $name = strtolower($name);
 
-        $wrapChild = function ($name) {
+        $wrapChild = function ($name, $new) {
             if (property_exists($this, "singletonChildWrappers") && array_key_exists($name, $this->singletonChildWrappers)) {
-                $this->__childrenSingleton[$name] = new $this->singletonChildWrappers[$name]($this->__childrenSingleton[$name]->getSimpleXMLElement());
+                if ($new) {
+                    $this->__childrenSingleton[$name] = new $this->singletonChildWrappers[$name]($this->__childrenSingleton[$name]->getSimpleXMLElement());
+                } else {
+                    $this->__childrenSingleton[$name] = $this->singletonChildWrappers[$name]::createFromSimpleXMLElement($this->__childrenSingleton[$name]->getSimpleXMLElement());
+                }
             }
         };
 
@@ -37,7 +41,7 @@ trait SingletonChild
          */
         if (!isset($this->getSimpleXMLElement()->{$name}[0])) {
             $this->__childrenSingleton[$name] = $this->addChild($name);
-            $wrapChild($name);
+            $wrapChild($name, true);
         }
 
         /**
@@ -45,7 +49,7 @@ trait SingletonChild
          */
         if (!isset($this->__childrenSingleton[$name])) {
             $this->__childrenSingleton[$name] = new SimpleXMLImplement($this->getSimpleXMLElement()->{$name}[0]);
-            $wrapChild($name);
+            $wrapChild($name, false);
         }
 
         return $this->__childrenSingleton[$name];
