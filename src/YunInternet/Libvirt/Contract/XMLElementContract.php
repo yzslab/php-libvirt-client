@@ -38,8 +38,8 @@ interface XMLElementContract
     /**
      * Find a child which should be unique
      * @param string $name XML tag name
-     * @param callable|null $filter A closure accept a \SimpleXMLElement as parameter and return bool|string|int; true represented push the child to the array, string|int will be used as the array key
-     * @param callable|string|null $wrapper A closure accept a \SimpleXMLElement as parameter and return a wrapped object, or a classname, or null represented that do not wrap children
+     * @param callable|null $filter A callable accept a \SimpleXMLElement as parameter and return bool|string|int; true represented push the child to the array, string|int will be used as the array key
+     * @param callable|string|null $wrapper A callable accept a \SimpleXMLElement as parameter and return a wrapped object, or a classname, or null represented that do not wrap children
      * @return XMLElementContract|null
      */
     public function findChild($name, $filter = null, $wrapper = null);

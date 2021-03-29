@@ -72,11 +72,6 @@ class Device extends SimpleXMLImplement
      */
     public function getDiskCollection($filter = null): array
     {
-        if (is_callable($filter) === false) {
-            $filter = function ($disk) {
-                return true;
-            };
-        }
         return $this->getChildren("disk", $filter, Disk::class);
     }
 
@@ -143,11 +138,6 @@ class Device extends SimpleXMLImplement
      */
     public function getInterfaceCollection($filter = null): array
     {
-        if (is_callable($filter) === false) {
-            $filter = function ($interface) {
-                return true;
-            };
-        }
         return $this->getChildren("interface", $filter, InterfaceDevice::class);
     }
 
