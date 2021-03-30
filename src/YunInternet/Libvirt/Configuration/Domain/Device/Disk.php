@@ -37,8 +37,11 @@ class Disk extends SimpleXMLImplement
 
     use SingletonChild;
 
-    public function __construct($type, $device, \SimpleXMLElement $simpleXMLElement)
+    public function __construct($type, $device, \SimpleXMLElement $simpleXMLElement = null)
     {
+        if (is_null($simpleXMLElement)) {
+            $simpleXMLElement = new \SimpleXMLElement("<disk/>");
+        }
         parent::__construct($simpleXMLElement);
 
         $this->driver()->setAttribute("name", "qemu");

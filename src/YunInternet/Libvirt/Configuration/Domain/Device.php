@@ -14,23 +14,38 @@ use YunInternet\Libvirt\Configuration\Domain\Device\Graphic;
 use YunInternet\Libvirt\Configuration\Domain\Device\Input;
 use YunInternet\Libvirt\Configuration\Domain\Device\InterfaceDevice;
 use YunInternet\Libvirt\Configuration\Domain\Device\MemoryBalloon;
+use YunInternet\Libvirt\Exception\DomainException;
+use YunInternet\Libvirt\Exception\ErrorCode;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
+/**
+ * Class Device
+ * @method SimpleXMLImplement emulator()
+ * @method MemoryBalloon memballoon()
+ * @package YunInternet\Libvirt\Configuration\Domain
+ */
 class Device extends SimpleXMLImplement
 {
-    use SingletonChild;
+    protected $singletonChildWrappers = [
+        "memballoon" => MemoryBalloon::class,
+    ];
 
-    /**
-     * @var MemoryBalloon
-     */
-    private $memballoon;
+    use SingletonChild;
 
     public function __construct(\SimpleXMLElement $simpleXMLElement)
     {
         parent::__construct($simpleXMLElement);
+    }
 
-        $this->memballoon = new MemoryBalloon($this->getSimpleXMLElement()->addChild("memballoon"));
+    /**
+     * @param $emulator
+     * @return $this
+     */
+    public function setEmulator($emulator)
+    {
+        $this->emulator()->setValue($emulator);
+        return $this;
     }
 
     /**
@@ -52,6 +67,55 @@ class Device extends SimpleXMLImplement
     }
 
     /**
+     * @param callable|null $filter A callable accept a Disk as parameter
+     * @return Disk[]
+     */
+    public function getDiskCollection($filter = null): array
+    {
+        return $this->getChildren("disk", $filter, Disk::class);
+    }
+
+    /**
+     * @param string $device
+     * @return Disk[]
+     */
+    public function getDiskCollectionByDevice(string $device): array
+    {
+        return $this->getDiskCollection(function (Disk $disk) use ($device) {
+            return $disk->getDevice() === $device;
+        });
+    }
+
+    /**
+     * @param string $targetDev
+     * @return Disk|null
+     */
+    public function getDiskByTargetDev($targetDev)
+    {
+        $collection = $this->getDiskCollection(function (Disk $disk) use ($targetDev) {
+            return $disk->getTargetDevice() === $targetDev;
+        });
+        $collectionCount = count($collection);
+        if ($collectionCount === 1) {
+            return $collection[0];
+        } else if ($collectionCount > 1) {
+            throw new DomainException("target disk dev value not unique", ErrorCode::DISK_TARGET_DEV_VALUE_NOT_UNIQUE);
+        }
+        throw new DomainException("target disk not found", ErrorCode::DISK_NOT_FOUND);
+    }
+
+    /**
+     * @param string $targetDev
+     * @return $this
+     * @throws DomainException
+     */
+    public function removeDiskByTargetDev(string $targetDev)
+    {
+        $this->removeDevice($this->getDiskByTargetDev($targetDev));
+        return $this;
+    }
+
+    /**
      * @param $type
      * @param null $interfaceConfiguration
      * @return $this|InterfaceDevice Return $this on $interfaceConfiguration is callable, or return InterfaceDevice
@@ -66,6 +130,43 @@ class Device extends SimpleXMLImplement
         }
 
         return $interface;
+    }
+
+    /**
+     * @param null|callable $filter
+     * @return InterfaceDevice[]
+     */
+    public function getInterfaceCollection($filter = null): array
+    {
+        return $this->getChildren("interface", $filter, InterfaceDevice::class);
+    }
+
+    /**
+     * @param string $macAddress
+     * @return InterfaceDevice
+     * @throws DomainException
+     */
+    public function getInterfaceByMacAddress(string $macAddress): InterfaceDevice
+    {
+        $collection = $this->getInterfaceCollection(function (InterfaceDevice $interfaceDevice) use ($macAddress) {
+            return $interfaceDevice->getMacAddress() === $macAddress;
+        });
+        $collectionCount = count($collection);
+        if ($collectionCount === 1) {
+            return $collection[0];
+        } else if ($collectionCount > 1) {
+            throw new DomainException("interface mac address not unique", ErrorCode::INTERFACE_MAC_ADDRESS_NOT_UNIQUE);
+        }
+        throw new DomainException("interface not found", ErrorCode::INTERFACE_NOT_FOUND);
+    }
+
+    /**
+     * @param string $macAddress
+     * @throws DomainException
+     */
+    public function removeInterfaceByMacAddress(string $macAddress)
+    {
+        $this->removeDevice($this->getInterfaceByMacAddress($macAddress));
     }
 
     public function addInput($inputConfiguration = null)
@@ -138,6 +239,16 @@ class Device extends SimpleXMLImplement
         return $this;
     }
 
+    /**
+     * @param SimpleXMLImplement $simpleXMLImplement
+     * @return $this
+     */
+    public function removeDevice(SimpleXMLImplement $simpleXMLImplement)
+    {
+        $this->removeChild($simpleXMLImplement);
+        return $this;
+    }
+
     public function useAbsoluteMousePointer()
     {
         $this->addInput(function (Input $input) {
@@ -152,15 +263,7 @@ class Device extends SimpleXMLImplement
 
     public function disableMemoryBalloon()
     {
-        $this->memballoon->setModel("none");
-        return;
-    }
-
-    /**
-     * @return MemoryBalloon
-     */
-    public function memballoon()
-    {
-        return $this->memballoon;
+        $this->memballoon()->setModel("none");
+        return $this;
     }
 }
