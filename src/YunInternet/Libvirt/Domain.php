@@ -10,9 +10,9 @@ namespace YunInternet\Libvirt;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk;
 use YunInternet\Libvirt\Configuration\Domain\Device\InterfaceDevice;
 use YunInternet\Libvirt\Constants\Domain\VirDomainXMLFlags;
-use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\Exception\DomainException;
 use YunInternet\Libvirt\Exception\ErrorCode;
+use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 
 /**
  * Class Domain
@@ -164,44 +164,26 @@ class Domain extends Libvirt
      */
     public function getDiskCollection($filter = null, $inactive = false): array
     {
-        if (is_callable($filter) === false) {
-            $filter = function ($disk) {
-                return true;
-            };
-        }
-        $diskCollection = [];
-        foreach ($this->domainSimpleXMLElement(null, $inactive ? VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE : 0)->devices->disk as $disk) {
-            $disk = self::createConfigurationWithXML(Disk::class, $disk);
-            $key = $filter($disk);
-            $this->add2CollectionBasedOnFilterResult($key, $diskCollection, $disk);
-        }
-        return $diskCollection;
+        return $this->getConfigurationBuilder($inactive)->devices()->getDiskCollection($filter);
     }
 
     /**
      * @param string $device
      * @return Disk[]
      */
-    public function getDiskCollectionByDevice($device)
+    public function getDiskCollectionByDevice(string $device)
     {
-        return $this->getDiskCollection(function (Disk $disk) use ($device) {
-            return $disk->getDevice() === $device;
-        });
+        return $this->getConfigurationBuilder(false)->device()->getDiskCollectionByDevice($device);
     }
 
     /**
      * @param string $targetDev
-     * @return Disk
+     * @return Disk|null
+     * @throws DomainException
      */
-    public function getDiskByTargetDev($targetDev)
+    public function getDiskByTargetDev(string $targetDev)
     {
-        $collection = $this->getDiskCollection(function (Disk $disk) use ($targetDev) {
-            return $disk->getTargetDevice() === $targetDev;
-        });
-        if (count($collection)) {
-            return $collection[0];
-        }
-        throw new DomainException("target disk not found", ErrorCode::DISK_NOT_FOUND);
+        return $this->getConfigurationBuilder(false)->device()->getDiskByTargetDev($targetDev);
     }
 
     /**
@@ -212,7 +194,7 @@ class Domain extends Libvirt
      */
     public function attachDisk($type, $device, $builder, $flags = null)
     {
-        $disk = new Disk($type, $device, new \SimpleXMLElement("<disk/>"));
+        $disk = new Disk($type, $device);
         $builder($disk);
         $this->libvirt_domain_attach_device($disk->getXML(), $this->returnCommonFlagsOnNull($flags));
     }
@@ -229,16 +211,16 @@ class Domain extends Libvirt
 
     /**
      * @param string $targetDev
-     * @param callable|string|null $configurationBuilder
+     * @param callable|string|null $source
      * @param null|int $flags
      */
-    public function changeMedia($targetDev, $source, $flags = null)
+    public function changeMedia($targetDev, $source = null, $flags = null)
     {
         $disk = $this->getDiskByTargetDev($targetDev);
         if (is_string($source)) {
             $disk->fileSource($source);
         } else if (is_null($source)) {
-            $disk->removeChild("source");
+            $disk->removeChildByName("source");
         } else if (is_callable($source)) {
             $source($disk);
         } else {
@@ -254,20 +236,9 @@ class Domain extends Libvirt
      * @param bool $inactive
      * @return InterfaceDevice[]
      */
-    public function getInterfaceCollection($filter = null, $inactive = false)
+    public function getInterfaceCollection($filter = null, $inactive = false): array
     {
-        if (is_callable($filter) === false) {
-            $filter = function ($interface) {
-                return true;
-            };
-        }
-        $interfaceCollection = [];
-        foreach ($this->domainSimpleXMLElement(null, $inactive ? VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE : 0)->devices->interface as $interface) {
-            $interfaceDevice = self::createConfigurationWithXML(InterfaceDevice::class, $interface);
-            $key = $filter($interfaceDevice);
-            $this->add2CollectionBasedOnFilterResult($key, $interfaceCollection, $interfaceDevice);
-        }
-        return $interfaceCollection;
+        return $this->getConfigurationBuilder($inactive)->device()->getInterfaceCollection();
     }
 
     /**
@@ -275,15 +246,9 @@ class Domain extends Libvirt
      * @return InterfaceDevice
      * @throws DomainException
      */
-    public function getInterfaceByMacAddress($macAddress)
+    public function getInterfaceByMacAddress(string $macAddress): InterfaceDevice
     {
-        $collection = $this->getInterfaceCollection(function (InterfaceDevice $interfaceDevice) use ($macAddress) {
-            return $interfaceDevice->getMacAddress() === $macAddress;
-        });
-        if (count($collection)) {
-            return $collection[0];
-        }
-        throw new DomainException("interface not found", ErrorCode::INTERFACE_NOT_FOUND);
+        return $this->getConfigurationBuilder(false)->device()->getInterfaceByMacAddress($macAddress);
     }
 
     /**
@@ -375,6 +340,15 @@ class Domain extends Libvirt
     }
 
     /**
+     * @param bool $inactive Based on inactive XML
+     * @return Configuration\Domain
+     */
+    public function getConfigurationBuilder($inactive = true): \YunInternet\Libvirt\Configuration\Domain
+    {
+        return self::createConfigurationWithXML(\YunInternet\Libvirt\Configuration\Domain::class, $this->domainSimpleXMLElement($inactive ? VirDomainXMLFlags::VIR_DOMAIN_XML_INACTIVE : 0));
+    }
+
+    /**
      * @return mixed
      */
     public function getDomainResource()
@@ -446,16 +420,10 @@ class Domain extends Libvirt
     /**
      * @param $configurationClass
      * @param \SimpleXMLElement $simpleXMLElement
-     * @return XMLElementContract
-     * @throws \ReflectionException
+     * @return SimpleXMLImplement
      */
-    private static function createConfigurationWithXML($configurationClass, \SimpleXMLElement $simpleXMLElement): XMLElementContract
+    private static function createConfigurationWithXML($configurationClass, \SimpleXMLElement $simpleXMLElement): SimpleXMLImplement
     {
-        $reflectionClass = new \ReflectionClass($configurationClass);
-        $simpleXMLElementProperty = $reflectionClass->getParentClass()->getProperty("simpleXMLElement");
-        $simpleXMLElementProperty->setAccessible(true);
-        $configuration = $reflectionClass->newInstanceWithoutConstructor();
-        $simpleXMLElementProperty->setValue($configuration, $simpleXMLElement);
-        return $configuration;
+        return $configurationClass::createFromSimpleXMLElement($simpleXMLElement);
     }
 }

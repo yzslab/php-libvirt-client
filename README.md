@@ -26,6 +26,7 @@ make -j8 install
 composer require yuninternet/php-libvirt-client
 ```
 ## Usage
+### Creat new domain
 ```
 <?php
 // ...
@@ -63,11 +64,15 @@ $domainXML->device()
             ->setListenAddress("0.0.0.0")
         ;
     })
+    ->addQEMUGuestAgentChannel()
     ->disableMemoryBalloon()
 ;
 
-$connection = new YunInternet\Libvir\Connection("test:///default");
+$connection = new YunInternet\Libvir\Connection("qemu:///system"); // qemu+tls://libvirt-hostname/system?pkipath=/your-pki-path
 $domain = $connection->domainDefineXML($domainXML->getXML());
+```
+### Domain operations
+```
 $domain->libvirt_domain_create(); // Power on
 
 var_dump($domain->vncDisplay()); // Print VNC port
@@ -77,11 +82,9 @@ $domain->setVNCPassword("87654321"); // Change VNC password
 $domain->changeMedia("hda", "/mnt/medias/ubuntu-20.04.1-live-server-amd64.iso");
 $domain->changeMedia("hda", function (Domain\Device\Disk $disk) {
     $disk
-        ->fileSource("/iso/iso.iso")
-        ->setDriverType("raw")
-    ;
+        ->volumeSource("iso", "debian-10");
 });
-$domain->changeMedia("hda", null); // Eject
+$domain->changeMedia("hda"); // Eject
 
 // Attach disk to exists domain
 $domain->attachDisk("file", "disk", function (Disk $disk) {
@@ -96,31 +99,72 @@ $domain->attachDisk("file", "disk", function (Disk $disk) {
 });
 // Detach disk
 $domain->detachDiskByTargetDev("vdb");
+
+// Change network interface
+$interface = $domain->getInterfaceByMacAddress("52:54:00:00:00:01");
+$interface
+    ->setSourceNetwork("bridge0")
+    ->setModel("e1000");
+$domain->libvirt_domain_update_device($interface->getXML(), VIR_DOMAIN_DEVICE_MODIFY_CONFIG);
+
+// QEMU Guest Agent
+$qga = $domain->getGuestAgent();
+$qga->ping();
+$networkInterfaces = $qga->getNetworkInterfaces();
+foreach ($networkInterfaces["return"] as $networkInterface) {
+    var_dump($networkInterface);
+}
 ```
-## More example
+### Modify exists domain configuration
+```
+$domain = $connection->domainLookupByName("Test");
+$domainXML = $domain->getConfigurationBuilder();
+$domainXML->os()
+    ->setMachine("q35")
+    ->setLoader("/usr/share/ovmf/OVMF.fd")
+    ->setLoaderReadonly(true);
+$domainXML->devices()
+    ->removeDiskByTargetDev("hda")
+    ->removeDiskByTargetDev("vdb");
+$domainXML->devices()
+    ->addDisk("file", "disk", function (Domain\Device\Disk $disk) {
+        $disk
+            ->fileSource("/mnt/medias/sda.qcow2")
+            ->setDriverType("qcow2")
+            ->setTargetBus("virtio-scsi")
+            ->setTargetDevice("sda");
+    })
+    ->addDisk("file", "cdrom", function (Domain\Device\Disk $disk) {
+        $disk
+            ->fileSource("/iso/iso.iso")
+            ->setDriverType("raw")
+            ->setTargetBus("sata")
+            ->setTargetDevice("sdb")
+        ;
+    });
+$domainXML->devices()->getDiskByTargetDev("vda")->fileSource("/mnt/medias/vda.qcow2");
+$domain = $connection->domainDefineXML($domainXML->getXML());
+```
+## More examples
 In tests/YunInternet/Libvirt/Test：
 ```
 phpunit
 ```
 ## Some configuration suggestions for Windows guest
 ```
-        ...->features()->addChild("hyperv", null, function (XMLElementContract $feature) {
-            $feature
-                ->createChild("relaxed", null, ["state" => "on"])
-                ->createChild("vapic", null, ["state" => "on"])
-                ->createChild("spinlocks", null, ["state" => "on", "retries" => "8191"])
-                ->createChild("vpindex", null, ["state" => "on"])
-                ->createChild("runtime", null, ["state" => "on"])
-                ->createChild("synic", null, ["state" => "on"])
-                ->createChild("stimer", null, ["state" => "on"])
-                ->createChild("reset", null, ["state" => "on"])
-            ;
-        });
-        
-        ...->clock()
-            ->setOffset("localtime")
-            ->addTimer("hypervclock", function (SimpleXMLImplement $timer) {
-                $timer->setAttribute("present", "yes");
-            })
-        ;
+$domainXML->features()->hyperv()
+    ->setRelaxed(true)
+    ->setVapic(true)
+    ->setSpinLocks(true, 4095)
+    ->setVpindex(true)
+    ->setRuntime(true)
+    ->setSynic(true)
+    ->setStimer(true)
+    ->setReset(true);
+
+$domainXML->clock()
+    ->setOffset("localtime")
+    ->addTimer("hypervclock", function (SimpleXMLImplement $timer) {
+        $timer->setAttribute("present", "yes");
+    });
 ```
