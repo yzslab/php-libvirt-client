@@ -68,7 +68,7 @@ $domainXML->device()
     ->disableMemoryBalloon()
 ;
 
-$connection = new yuninternet\Libvirt\Connection("qemu:///system"); // qemu+tls://libvirt-hostname/system?pkipath=/your-pki-path
+$connection = new YunInternet\Libvirt\Connection("qemu:///system"); // qemu+tls://libvirt-hostname/system?pkipath=/your-pki-path
 $domain = $connection->domainDefineXML($domainXML->getXML());
 ```
 ### Domain operations
