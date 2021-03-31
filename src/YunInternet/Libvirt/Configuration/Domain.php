@@ -24,11 +24,13 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * Class Domain
  * @method XMLElementContract name()
  * @method XMLElementContract memory()
+ * @method XMLElementContract currentMemory()
  * @method XMLElementContract vcpu()
  * @method CPU cpu()
  * @method OS os()
  * @method PowerManagement pm()
  * @method Device devices()
+ * @method Device device()
  * @method BlockIOTune blkiotune()
  * @method Clock clock()
  * @method XMLElementContract uuid()
@@ -40,6 +42,13 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  */
 class Domain extends SimpleXMLImplement
 {
+    const QEMU_NAMESPACE = "http://libvirt.org/schemas/domain/qemu/1.0";
+
+    protected $singletonChildAliases = [
+        "device" => "devices",
+        "QEMUCommandLine" => "qemu:commandline",
+    ];
+
     protected $singletonChildWrappers = [
         "cpu" => CPU::class,
         "os" => OS::class,
@@ -67,7 +76,7 @@ class Domain extends SimpleXMLImplement
 
         $this->name()->setValue($name);
 
-        $this->memory()->setValue($memory)->setAttribute("unit", "MiB");
+        $this->setMemory($memory);
 
         $this->vcpu()->setValue($maxAllocatedVCPU)->setAttribute("placement", "static");
 
@@ -98,9 +107,44 @@ class Domain extends SimpleXMLImplement
         $this->initFeatures();
     }
 
+    /**
+     * @param string $namespace
+     * @param string $value
+     * @return $this
+     */
+    public function setXMLNamespace(string $namespace, string $value)
+    {
+        $this->getSimpleXMLElement()["xmlns:" . $namespace] = $value;
+        return $this;
+    }
+
     public function setType($type)
     {
         $this->setAttribute("type", $type);
+        return $this;
+    }
+
+    /**
+     * The maximum allocation of memory for the guest at boot time
+     * @param int $allocation
+     * @param string $unit
+     * @return $this
+     */
+    public function setMemory(int $allocation, string $unit = "MiB")
+    {
+        $this->memory()->setValue($allocation)->setAttribute("unit", $unit);
+        return $this;
+    }
+
+    /**
+     * The actual allocation of memory for the guest
+     * @param int $allocation
+     * @param string $unit
+     * @return $this
+     */
+    public function setCurrentMemory(int $allocation, string $unit = "MiB")
+    {
+        $this->currentMemory()->setValue($allocation)->setAttribute("unit", $unit);
         return $this;
     }
 
@@ -140,15 +184,35 @@ class Domain extends SimpleXMLImplement
         return $this->pm();
     }
 
-    public function device()
-    {
-        return $this->devices();
-    }
-
     public function sysinfo()
     {
         return new SysInfo($this->getSimpleXMLElement()->addChild("sysinfo"));
     }
+
+    public function setQEMUCommandLineArguments(array $arguments)
+    {
+        $QEMUCommandLineElement = $this->QEMUCommandLineElement();
+        foreach ($QEMUCommandLineElement->children(self::QEMU_NAMESPACE)->arg as $child) {
+            $childDOM = dom_import_simplexml($child);
+            $childDOM->parentNode->removeChild($childDOM);
+        }
+        foreach ($arguments as $argument) {
+            $child = $QEMUCommandLineElement->addChild("xmlns:qemu:arg");
+            $child["value"] = $argument;
+        }
+        return $this;
+    }
+
+    private function QEMUCommandLineElement()
+    {
+        $this->setXMLNamespace("qemu", self::QEMU_NAMESPACE);
+        $QEMUCommandLine = $this->getSimpleXMLElement()->children(self::QEMU_NAMESPACE)->commandline[0];
+        if (is_null($QEMUCommandLine)) {
+            $QEMUCommandLine = $this->getSimpleXMLElement()->addChild("xmlns:qemu:commandline");
+        }
+        return $QEMUCommandLine;
+    }
+
 
     private function initFeatures()
     {

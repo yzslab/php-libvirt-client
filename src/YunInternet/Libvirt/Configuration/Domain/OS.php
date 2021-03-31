@@ -21,6 +21,9 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @property int $bootMenuTimeout microsecond unit
  * @method XMLElementContract bootmenu()
  * @method XMLElementContract type()
+ * @method XMLElementContract kernel()
+ * @method XMLElementContract initrd()
+ * @method XMLElementContract cmdline()
  * @method XMLElementContract loader()
  * @method XMLElementContract smbios()
  * @package YunInternet\Libvirt\Configuration\Domain
@@ -65,6 +68,42 @@ class OS extends SimpleXMLImplement
     public function setMachine($machine)
     {
         $this->type()->setAttribute("machine", $machine);
+        return $this;
+    }
+
+    public function setKernel(string $kernel)
+    {
+        $this->kernel()->setValue($kernel);
+        return $this;
+    }
+
+    public function removeKernel()
+    {
+        $this->removeChild($this->kernel());
+        return $this;
+    }
+
+    public function setInitrd(string $initrd)
+    {
+        $this->initrd()->setValue($initrd);
+        return $this;
+    }
+
+    public function removeInitrd()
+    {
+        $this->removeChild($this->initrd());
+        return $this;
+    }
+
+    public function setCMDLine(string $cmdline)
+    {
+        $this->cmdline()->setValue($cmdline);
+        return $this;
+    }
+
+    public function removeCMDLine()
+    {
+        $this->removeChild($this->cmdline());
         return $this;
     }
 

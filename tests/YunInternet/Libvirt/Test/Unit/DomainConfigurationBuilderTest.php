@@ -317,6 +317,15 @@ class DomainConfigurationBuilderTest extends TestCase
         $domain->getDiskByTargetDev("vdc");
         $domainXML = $domain->getConfigurationBuilder();
 
+        $domainXML
+            ->setMemory("3072")
+            ->setCurrentMemory("2048");
+
+        $domainXML->os()
+            ->setKernel("/usr/src/linux-5.10.12/arch/x86/boot/bzImage")
+            ->setInitrd("/usr/src/linux-5.10.12/initrd.img")
+            ->setCMDLine("root=UUID=1dfafb06-78d8-46b6-877b-a09819b285bb ro nokaslr");
+
         // Test remove disk
         $domainXML->device()->removeDiskByTargetDev("vdc");
         try {
@@ -335,7 +344,48 @@ class DomainConfigurationBuilderTest extends TestCase
             $this->assertEquals($domainException->getCode(), ErrorCode::INTERFACE_NOT_FOUND);
         }
 
+        $domainXML->setQEMUCommandLineArguments([
+            "-gdb",
+            "tcp::1235",
+        ]);
+
+        $xml = $domainXML->getFormattedXML();
+        print $xml;
+
+
+        $domainSimpleXMLElement = new \SimpleXMLElement($xml);
+
+        $this->assertEquals($domainSimpleXMLElement->memory[0]->__toString(), "3072");
+        $this->assertEquals($domainSimpleXMLElement->memory[0]["unit"]->__toString(), "MiB");
+        $this->assertEquals($domainSimpleXMLElement->currentMemory[0]->__toString(), "2048");
+        $this->assertEquals($domainSimpleXMLElement->currentMemory[0]["unit"]->__toString(), "MiB");
+
+        $this->assertEquals($domainSimpleXMLElement->os[0]->kernel[0]->__toString(), "/usr/src/linux-5.10.12/arch/x86/boot/bzImage");
+        $this->assertEquals($domainSimpleXMLElement->os[0]->initrd[0]->__toString(), "/usr/src/linux-5.10.12/initrd.img");
+        $this->assertEquals($domainSimpleXMLElement->os[0]->cmdline[0]->__toString(), "root=UUID=1dfafb06-78d8-46b6-877b-a09819b285bb ro nokaslr");
+
+        $this->assertEquals($domainSimpleXMLElement->children(Domain::QEMU_NAMESPACE)->commandline[0]->children(Domain::QEMU_NAMESPACE)->arg[0]->attributes()["value"]->__toString(), "-gdb");
+        $this->assertEquals($domainSimpleXMLElement->children(Domain::QEMU_NAMESPACE)->commandline[0]->children(Domain::QEMU_NAMESPACE)->arg[1]->attributes()["value"]->__toString(), "tcp::1235");
+
+
         $connection->domainDefineXML($domainXML->getXML());
+
+        $domainXML = $domain->getConfigurationBuilder();
+        $domainXML->os()
+            ->removeKernel()
+            ->removeInitrd()
+            ->removeCMDLine();
+        $domainXML->setQEMUCommandLineArguments([]);
+        $xml = $domainXML->getFormattedXML();
+        $domainSimpleXMLElement = new \SimpleXMLElement($xml);
+        print $xml;
+        $this->assertNull($domainSimpleXMLElement->os->kernel[0]);
+        $this->assertNull($domainSimpleXMLElement->os->initrd[0]);
+        $this->assertNull($domainSimpleXMLElement->os->cmdline[0]);
+        $this->assertEquals(count($domainSimpleXMLElement->children(Domain::QEMU_NAMESPACE)->commandline[0]->children(Domain::QEMU_NAMESPACE)), 0);
+
+        $connection->domainDefineXML($domainXML->getXML());
+
         $this->assertTrue($domain->libvirt_domain_undefine());
     }
 }

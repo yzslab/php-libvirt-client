@@ -24,12 +24,16 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract wwn()
  * @method XMLElementContract vendor()
  * @method XMLElementContract product()
- * @method IOTune IOtune()
+ * @method IOTune IOTune()
  * @method Address address()
  * @package YunInternet\Libvirt\Configuration\Domain\Device
  */
 class Disk extends SimpleXMLImplement
 {
+    protected $singletonChildAliases = [
+        "IOTune" => "iotune",
+    ];
+
     protected $singletonChildWrappers = [
         "iotune" => IOTune::class,
         "address" => Address::class,
