@@ -9,6 +9,7 @@ namespace YunInternet\Libvirt\Configuration\Domain\Device;
 
 
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk\Address;
+use YunInternet\Libvirt\Configuration\Domain\Device\Disk\BackingStore;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk\IOTune;
 use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
@@ -26,17 +27,20 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract product()
  * @method IOTune IOTune()
  * @method Address address()
+ * @method BackingStore BackingStore()
  * @package YunInternet\Libvirt\Configuration\Domain\Device
  */
 class Disk extends SimpleXMLImplement
 {
     protected $singletonChildAliases = [
         "IOTune" => "iotune",
+        "BackingStore" => "backingStore"
     ];
 
     protected $singletonChildWrappers = [
         "iotune" => IOTune::class,
         "address" => Address::class,
+        "backingStore" => BackingStore::class
     ];
 
     use SingletonChild;
