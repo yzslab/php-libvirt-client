@@ -23,7 +23,7 @@ make -j8 install
 ```
 ## Install
 ```
-composer require YunInternet/php-libvirt-client
+composer require yuninternet/php-libvirt-client
 ```
 ## Usage
 ### Creat new domain
