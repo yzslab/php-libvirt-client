@@ -1,12 +1,8 @@
 <?php
-/**
- * Created by PhpStorm.
- * Date: 19-2-17
- * Time: 上午1:20
- */
 
 namespace YunInternet\Libvirt\Configuration\Domain\Device\Disk;
 
+use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
@@ -14,38 +10,33 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * Class BackingStore
  * @method XMLElementContract source()
  * @method XMLElementContract format()
+ * @method BackingStore backingStore()
  * @package YunInternet\Libvirt\Configuration\Domain\Device\Disk
  */
 class BackingStore extends SimpleXMLImplement
 {
-    protected $singletonChildAliases = [
-        "BackingStore" => "backingStore"
-    ];
-
     protected $singletonChildWrappers = [
-        "backingStore" => \YunInternet\Libvirt\Configuration\Domain\Device\Disk\BackingStore::class
+        "backingStore" => self::class
     ];
 
     use SingletonChild;
 
-    public function isActive()
+    public function isActive(): bool
     {
         return !empty($this->getType());
     }
 
-    public function Nested()
+    public function getLayer(): int
     {
-        $num = 0;
+        if ($this->isActive() === false) {
+            return 0;
+        }
 
-        if ($this->BackingStore()->isActive())
-        {
-            $num += $this->BackingStore()->Nested();
+        $layer = 1;
+        if ($this->backingStore()->isActive()) {
+            $layer += $this->backingStore()->getLayer();
         }
-        if ($this->isActive())
-        {
-            $num++;
-        }
-        return $num;
+        return $layer;
     }
 
     public function setType($type)
@@ -65,13 +56,24 @@ class BackingStore extends SimpleXMLImplement
         return $this;
     }
 
-    public function getfileSource()
+    public function getFileSource()
     {
         return $this->source()->getAttribute('file');
+    }
+
+    public function setFormat(string $type)
+    {
+        $this->format()->setAttribute("type", $type);
+        return $this;
     }
 
     public function getFormat()
     {
         return $this->format()->getAttribute('type');
+    }
+
+    public function hasBacking(): bool
+    {
+        return is_null($this->findChild("backingStore")) === false && $this->backingStore()->isActive();
     }
 }
