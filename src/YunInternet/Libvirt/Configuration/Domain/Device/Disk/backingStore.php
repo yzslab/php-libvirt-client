@@ -18,11 +18,29 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  */
 class backingStore extends SimpleXMLImplement
 {
+    protected $singletonChildWrappers = [
+        "backingStore" => \YunInternet\Libvirt\Configuration\Domain\Device\Disk\backingStore::class
+    ];
+
     use SingletonChild;
 
     public function isActive()
     {
         return !empty($this->getType());
+    }
+
+    public function Nested(int $num = 0)
+    {
+        if ($this->backingStore()->isActive())
+        {
+            $num = $this->backingStore()->Nested($num);
+
+        }
+        if ($this->isActive())
+        {
+            $num++;
+        }
+        return $num;
     }
 
     public function setType($type)
