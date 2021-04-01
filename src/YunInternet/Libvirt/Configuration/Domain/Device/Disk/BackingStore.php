@@ -11,15 +11,19 @@ use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
 /**
- * Class backingStore
+ * Class BackingStore
  * @method XMLElementContract source()
  * @method XMLElementContract format()
  * @package YunInternet\Libvirt\Configuration\Domain\Device\Disk
  */
-class backingStore extends SimpleXMLImplement
+class BackingStore extends SimpleXMLImplement
 {
+    protected $singletonChildAliases = [
+        "BackingStore" => "backingStore"
+    ];
+
     protected $singletonChildWrappers = [
-        "backingStore" => \YunInternet\Libvirt\Configuration\Domain\Device\Disk\backingStore::class
+        "backingStore" => \YunInternet\Libvirt\Configuration\Domain\Device\Disk\BackingStore::class
     ];
 
     use SingletonChild;
@@ -29,12 +33,13 @@ class backingStore extends SimpleXMLImplement
         return !empty($this->getType());
     }
 
-    public function Nested(int $num = 0)
+    public function Nested()
     {
-        if ($this->backingStore()->isActive())
-        {
-            $num = $this->backingStore()->Nested($num);
+        $num = 0;
 
+        if ($this->BackingStore()->isActive())
+        {
+            $num += $this->BackingStore()->Nested();
         }
         if ($this->isActive())
         {
