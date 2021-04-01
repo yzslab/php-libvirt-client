@@ -13,7 +13,7 @@ use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
 /**
- * Class BackingStore
+ * Class backingStore
  * @method XMLElementContract path()
  * @method XMLElementContract format()
  * @package YunInternet\Libvirt\Configuration\StorageVolume

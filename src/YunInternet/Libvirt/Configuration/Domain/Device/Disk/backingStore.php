@@ -16,11 +16,11 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
  * @method XMLElementContract format()
  * @package YunInternet\Libvirt\Configuration\Domain\Device\Disk
  */
-class BackingStore extends SimpleXMLImplement
+class backingStore extends SimpleXMLImplement
 {
     use SingletonChild;
 
-    public function active()
+    public function isActive()
     {
         return !empty($this->getType());
     }
