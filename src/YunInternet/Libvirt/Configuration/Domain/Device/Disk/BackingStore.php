@@ -16,7 +16,7 @@ use YunInternet\Libvirt\XMLImplement\SingletonChild;
 class BackingStore extends SimpleXMLImplement
 {
     protected $singletonChildWrappers = [
-        "backingStore" => self::class
+        "backingStore" => self::class,
     ];
 
     use SingletonChild;
