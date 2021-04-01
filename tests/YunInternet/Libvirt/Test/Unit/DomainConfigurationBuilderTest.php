@@ -404,8 +404,14 @@ class DomainConfigurationBuilderTest extends TestCase
         $this->assertNull($domainSimpleXMLElement->os->kernel[0]);
         $this->assertNull($domainSimpleXMLElement->os->initrd[0]);
         $this->assertNull($domainSimpleXMLElement->os->cmdline[0]);
+        $this->assertEquals("file", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]["type"]->__toString());
+        $this->assertEquals("qcow2", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->format[0]["type"]->__toString());
+        $this->assertEquals("/var/lib/libvirt/images/snapshot.qcow", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->source[0]["file"]->__toString());
+        $this->assertEquals("block", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]["type"]->__toString());
+        $this->assertEquals("raw", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->format[0]["type"]->__toString());
+        $this->assertEquals("/dev/mapper/base", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->source[0]["dev"]->__toString());
+        $this->assertNull($domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->backingStore[0]["type"]);
         $this->assertEquals(count($domainSimpleXMLElement->children(Domain::QEMU_NAMESPACE)->commandline[0]->children(Domain::QEMU_NAMESPACE)), 0);
-
 
         $connection->domainDefineXML($domainXML->getXML());
 
