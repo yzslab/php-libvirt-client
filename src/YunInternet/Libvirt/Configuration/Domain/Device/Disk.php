@@ -34,13 +34,12 @@ class Disk extends SimpleXMLImplement
 {
     protected $singletonChildAliases = [
         "IOTune" => "iotune",
-        "BackingStore" => "backingStore"
     ];
 
     protected $singletonChildWrappers = [
         "iotune" => IOTune::class,
         "address" => Address::class,
-        "backingStore" => BackingStore::class
+        "backingStore" => BackingStore::class,
     ];
 
     use SingletonChild;
@@ -55,8 +54,7 @@ class Disk extends SimpleXMLImplement
         $this->driver()->setAttribute("name", "qemu");
         $this
             ->setType($type)
-            ->setDevice($device)
-        ;
+            ->setDevice($device);
     }
 
     /**
@@ -93,8 +91,7 @@ class Disk extends SimpleXMLImplement
     {
         $this->source()
             ->setAttribute("pool", $poolName)
-            ->setAttribute("volume", $volumeName)
-        ;
+            ->setAttribute("volume", $volumeName);
         return $this;
     }
 
@@ -160,10 +157,14 @@ class Disk extends SimpleXMLImplement
     {
         if ($enable) {
             $this->readonly();
-        }
-        else {
+        } else {
             unset($this->getSimpleXMLElement()->readonly);
         }
         return $this;
+    }
+
+    public function hasBacking(): bool
+    {
+        return is_null($this->findChild("backingStore")) === false && $this->backingStore()->isActive();
     }
 }
