@@ -349,6 +349,8 @@ class DomainConfigurationBuilderTest extends TestCase
             "tcp::1235",
         ]);
 
+        $this->assertFalse($domainXML->devices()->getDiskByTargetDev("vdb")->hasBacking());
+
         $xml = $domainXML->getFormattedXML();
         print $xml;
 
@@ -376,12 +378,39 @@ class DomainConfigurationBuilderTest extends TestCase
             ->removeInitrd()
             ->removeCMDLine();
         $domainXML->setQEMUCommandLineArguments([]);
+
+        $vdb = $domainXML->devices()->getDiskByTargetDev("vdb");
+        $this->assertFalse($vdb->backingStore()->isActive());
+        $this->assertFalse($vdb->hasBacking()); // should be false event a <backingStore/> exists
+        $this->assertEquals($vdb->backingStore()->getLayer(), 0);
+        $vdb->backingStore()->setType("file")->setFormat("qcow2")->fileSource("/var/lib/libvirt/images/snapshot.qcow");
+        $this->assertTrue($vdb->backingStore()->isActive());
+        $this->assertTrue($vdb->hasBacking());
+        $this->assertEquals(1, $vdb->backingStore()->getLayer());
+
+        $this->assertFalse($vdb->backingStore()->hasBacking());
+        $this->assertFalse($vdb->backingStore()->backingStore()->isActive());
+        $this->assertFalse($vdb->backingStore()->hasBacking());
+        $this->assertEquals(1, $vdb->backingStore()->getLayer());
+        $vdb->backingStore()->backingStore()->setType("block")->setFormat("raw")->source()->setAttribute("dev", "/dev/mapper/base");
+        $this->assertTrue($vdb->backingStore()->backingStore()->isActive());
+        $this->assertTrue($vdb->backingStore()->hasBacking());
+        $this->assertEquals(2, $vdb->backingStore()->getLayer());
+        $this->assertEquals(1, $vdb->backingStore()->backingStore()->getLayer());
+
         $xml = $domainXML->getFormattedXML();
         $domainSimpleXMLElement = new \SimpleXMLElement($xml);
         print $xml;
         $this->assertNull($domainSimpleXMLElement->os->kernel[0]);
         $this->assertNull($domainSimpleXMLElement->os->initrd[0]);
         $this->assertNull($domainSimpleXMLElement->os->cmdline[0]);
+        $this->assertEquals("file", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]["type"]->__toString());
+        $this->assertEquals("qcow2", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->format[0]["type"]->__toString());
+        $this->assertEquals("/var/lib/libvirt/images/snapshot.qcow", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->source[0]["file"]->__toString());
+        $this->assertEquals("block", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]["type"]->__toString());
+        $this->assertEquals("raw", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->format[0]["type"]->__toString());
+        $this->assertEquals("/dev/mapper/base", $domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->source[0]["dev"]->__toString());
+        $this->assertNull($domainSimpleXMLElement->devices->disk[0]->backingStore[0]->backingStore[0]->backingStore[0]["type"]);
         $this->assertEquals(count($domainSimpleXMLElement->children(Domain::QEMU_NAMESPACE)->commandline[0]->children(Domain::QEMU_NAMESPACE)), 0);
 
         $connection->domainDefineXML($domainXML->getXML());
