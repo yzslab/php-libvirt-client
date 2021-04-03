@@ -9,6 +9,7 @@ namespace YunInternet\Libvirt\XMLImplement;
 
 
 use YunInternet\Libvirt\Contract\XMLElementContract;
+use YunInternet\Libvirt\Exception\XMLException;
 
 class SimpleXMLImplement implements XMLElementContract
 {
@@ -93,7 +94,7 @@ class SimpleXMLImplement implements XMLElementContract
         if ($collectionCount === 1) {
             return $collection[0];
         } else if ($collectionCount > 1) {
-            throw new \Exception("filter result not unique");
+            throw new XMLException("filter result not unique");
         }
         return null;
     }
