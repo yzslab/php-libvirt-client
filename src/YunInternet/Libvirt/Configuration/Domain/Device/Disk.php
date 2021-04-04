@@ -168,4 +168,13 @@ class Disk extends SimpleXMLImplement
     {
         return is_null($this->findChild("backingStore")) === false && $this->backingStore()->isActive();
     }
+
+    /**
+     * @param callable|null $filter A callable accept a BackingStore as parameter
+     * @return array BackingStore[]
+     */
+    public function getBackiStorageCollection($filter = null): array
+    {
+        return $this->getChildren("backingStore", $filter, BackingStore::class, true);
+    }
 }

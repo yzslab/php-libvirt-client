@@ -42,7 +42,7 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
-    public function getChildren($name, $filter = null, $wrapper = null): array
+    public function getChildren($name, $filter = null, $wrapper = null, bool $nested = false): array
     {
         if (is_array($filter)) {
             $attributes = $filter;
@@ -72,8 +72,13 @@ class SimpleXMLImplement implements XMLElementContract
             };
         }
 
+        return $this->GetCollection($name, $filter, $wrapper, $nested, $this->simpleXMLElement);
+    }
+
+    private function GetCollection(string $name, $filter, object $wrapper, bool $nested, $xml)
+    {
         $collection = [];
-        foreach ($this->simpleXMLElement->{$name} as $child) {
+        foreach ($xml->{$name} as $child) {
             $child = $wrapper($child);
             $key = $filter($child);
             // Add to collection
@@ -82,10 +87,14 @@ class SimpleXMLImplement implements XMLElementContract
             } else if (is_string($key) || is_integer($key)) {
                 $collection[$key] = $child;
             }
+            if ($nested && !empty($child->simpleXMLElement->{$name})) {
+                array_push($collection, ... $this->GetCollection($name, $filter, $wrapper, $nested, $child->simpleXMLElement));
+            }
         }
 
         return $collection;
     }
+
 
     public function findChild($name, $filter = null, $wrapper = null)
     {
