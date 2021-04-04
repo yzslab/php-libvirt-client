@@ -34,6 +34,7 @@ class Disk extends SimpleXMLImplement
 {
     protected $singletonChildAliases = [
         "IOTune" => "iotune",
+        "BackingStore" => "backingStore",
     ];
 
     protected $singletonChildWrappers = [
