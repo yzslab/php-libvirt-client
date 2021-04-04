@@ -72,13 +72,8 @@ class SimpleXMLImplement implements XMLElementContract
             };
         }
 
-        return $this->GetCollection($name, $filter, $wrapper, $nested, $this->simpleXMLElement);
-    }
-
-    private function GetCollection(string $name, $filter, object $wrapper, bool $nested, $xml)
-    {
         $collection = [];
-        foreach ($xml->{$name} as $child) {
+        foreach ($nested ? $this->simpleXMLElement->xpath('.//' . $name) : $this->simpleXMLElement->{$name} as $child) {
             $child = $wrapper($child);
             $key = $filter($child);
             // Add to collection
@@ -87,14 +82,10 @@ class SimpleXMLImplement implements XMLElementContract
             } else if (is_string($key) || is_integer($key)) {
                 $collection[$key] = $child;
             }
-            if ($nested && !empty($child->simpleXMLElement->{$name})) {
-                array_push($collection, ... $this->GetCollection($name, $filter, $wrapper, $nested, $child->simpleXMLElement));
-            }
         }
 
         return $collection;
     }
-
 
     public function findChild($name, $filter = null, $wrapper = null)
     {

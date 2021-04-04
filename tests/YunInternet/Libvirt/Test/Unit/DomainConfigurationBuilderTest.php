@@ -397,7 +397,7 @@ class DomainConfigurationBuilderTest extends TestCase
         $this->assertTrue($vdb->backingStore()->hasBacking());
         $this->assertEquals(2, $vdb->backingStore()->getLayer());
         $this->assertEquals(1, $vdb->backingStore()->backingStore()->getLayer());
-        $this->assertEquals(2, count($vdb->getBackiStorageCollection()));
+        $this->assertEquals(3, count($vdb->getBackiStorageCollection()));
 
         $hda = $domainXML->devices()->getDiskByTargetDev("hda");
         $this->assertEquals(0, count($hda->getBackiStorageCollection()));
