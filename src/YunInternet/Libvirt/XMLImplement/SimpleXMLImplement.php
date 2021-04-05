@@ -42,7 +42,7 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
-    public function getChildren($name, $filter = null, $wrapper = null): array
+    public function getChildren($name, $filter = null, $wrapper = null, bool $nested = false): array
     {
         if (is_array($filter)) {
             $attributes = $filter;
@@ -73,7 +73,7 @@ class SimpleXMLImplement implements XMLElementContract
         }
 
         $collection = [];
-        foreach ($this->simpleXMLElement->{$name} as $child) {
+        foreach ($nested ? $this->simpleXMLElement->xpath('.//' . $name) : $this->simpleXMLElement->{$name} as $child) {
             $child = $wrapper($child);
             $key = $filter($child);
             // Add to collection
