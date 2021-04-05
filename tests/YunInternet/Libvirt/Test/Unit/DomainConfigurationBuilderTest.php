@@ -397,9 +397,7 @@ class DomainConfigurationBuilderTest extends TestCase
         $this->assertTrue($vdb->backingStore()->hasBacking());
         $this->assertEquals(2, $vdb->backingStore()->getLayer());
         $this->assertEquals(1, $vdb->backingStore()->backingStore()->getLayer());
-
-        $backingStoreCollection = $vdb->getBackiStorageCollection();
-        $this->assertEquals(2, count($backingStoreCollection));
+        $this->assertEquals(2, count($backingStoreCollection = $vdb->getBackiStorageCollection()));
         $this->assertEquals("/var/lib/libvirt/images/snapshot.qcow", $backingStoreCollection[0]->source()->getAttribute("file"));
         $this->assertEquals("/dev/mapper/base", $backingStoreCollection[1]->source()->getAttribute("dev"));
 
