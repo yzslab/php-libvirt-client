@@ -79,7 +79,7 @@ class SimpleXMLImplement implements XMLElementContract
             // Add to collection
             if ($key === true) {
                 $collection[] = $child;
-            } else if (is_string($key) || is_integer($key)) {
+            } else if (is_string($key) || is_int($key)) {
                 $collection[$key] = $child;
             }
         }

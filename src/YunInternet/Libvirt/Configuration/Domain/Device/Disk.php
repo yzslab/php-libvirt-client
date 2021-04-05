@@ -175,6 +175,11 @@ class Disk extends SimpleXMLImplement
      */
     public function getBackiStorageCollection($filter = null): array
     {
+        if (is_null($filter)) {
+            $filter = function (BackingStore $backingStore) {
+                return $backingStore->isActive();
+            };
+        }
         return $this->getChildren("backingStore", $filter, BackingStore::class, true);
     }
 }
