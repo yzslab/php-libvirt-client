@@ -129,6 +129,15 @@ class SimpleXMLImplement implements XMLElementContract
         return $this->simpleXMLElement[$name] ? $this->simpleXMLElement[$name]->__toString() : null;
     }
 
+    public function getAttribute2Array(string $name, array &$array, string $alternative = '')
+    {
+        $attribute = $this->getAttribute($name);
+        if (!empty($attribute)) {
+            $array[(empty($alternative) ? $name : $alternative)] = $attribute;
+        }
+        return $attribute;
+    }
+
     /**
      * @return \SimpleXMLElement
      */
