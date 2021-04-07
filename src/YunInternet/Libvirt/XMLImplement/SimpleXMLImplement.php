@@ -124,6 +124,16 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
+    public function setAttributeFromArray(string $name, array $array, string $alternative = ''): XMLElementContract
+    {
+        if (isset($array[$name]))
+        {
+            $this->simpleXMLElement[(empty($alternative) ? $name : $alternative)] = $array[$name];
+        }
+
+        return $this;
+    }
+
     public function getAttribute($name)
     {
         return $this->simpleXMLElement[$name] ? $this->simpleXMLElement[$name]->__toString() : null;
