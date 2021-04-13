@@ -3,11 +3,21 @@
 namespace YunInternet\Libvirt\Configuration\Domain\Device\Disk;
 
 use YunInternet\Libvirt\Constants\Constants;
+use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
+/**
+ * Class Source
+ * @method XMLElementContract host()
+ * @package YunInternet\Libvirt\Configuration\Domain\Device\Host
+ */
 class Source extends SimpleXMLImplement
 {
+    protected $singletonChildWrappers = [
+        "host" => Host::class,
+    ];
+
     use SingletonChild;
 
     public function setFile(string $fileName)
@@ -48,12 +58,7 @@ class Source extends SimpleXMLImplement
             $this->getAttribute2Array('query', $array);
         }
 
-        if ($this->host()->getAttribute2Array('transport', $array) === 'unix') {
-            $this->host()->getAttribute2Array('socket', $array);
-        } else {
-            $this->host()->getAttribute2Array('name', $array, 'host');
-            $this->host()->getAttribute2Array('port', $array);
-        }
+        $this->timeout()->getAttribute2Array('seconds', $array, 'timeout');
 
         return $array;
     }
@@ -68,12 +73,7 @@ class Source extends SimpleXMLImplement
             $this->setAttributeFromArray('query', $array);
         }
 
-        if ($this->host()->getAttribute('transport') === 'unix') {
-            $this->host()->setAttributeFromArray('socket', $array);
-        } else {
-            $this->host()->setAttributeFromArray('host', $array, 'name');
-            $this->host()->setAttributeFromArray('port', $array);
-        }
+        $this->timeout()->setAttributeFromArray('timeout', $array, 'seconds');
 
         return $this;
     }
@@ -182,5 +182,14 @@ class Source extends SimpleXMLImplement
     {
         $this->setAttribute('protocol', $protocol);
         return $this;
+    }
+
+    /**
+     * @param callable|null $filter A callable accept a Host as parameter
+     * @return array Host[]
+     */
+    public function getHostCollection($filter = null): array
+    {
+        return $this->getChildren("host", $filter, Host::class);
     }
 }
