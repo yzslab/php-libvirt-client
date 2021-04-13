@@ -11,36 +11,38 @@ namespace YunInternet\Libvirt\Configuration\Domain\Device;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk\Address;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk\BackingStore;
 use YunInternet\Libvirt\Configuration\Domain\Device\Disk\IOTune;
+use YunInternet\Libvirt\Configuration\Domain\Device\Disk\Source;
 use YunInternet\Libvirt\Contract\XMLElementContract;
 use YunInternet\Libvirt\XMLImplement\SimpleXMLImplement;
 use YunInternet\Libvirt\XMLImplement\SingletonChild;
 
 /**
  * Class Disk
- * @method XMLElementContract driver()
- * @method XMLElementContract source()
- * @method XMLElementContract target()
- * @method XMLElementContract readonly()
- * @method XMLElementContract serial()
- * @method XMLElementContract wwn()
- * @method XMLElementContract vendor()
- * @method XMLElementContract product()
- * @method IOTune IOTune()
  * @method Address address()
  * @method BackingStore backingStore()
+ * @method IOTune IOTune()
+ * @method Source source()
+ * @method XMLElementContract driver()
+ * @method XMLElementContract product()
+ * @method XMLElementContract readonly()
+ * @method XMLElementContract serial()
+ * @method XMLElementContract target()
+ * @method XMLElementContract vendor()
+ * @method XMLElementContract wwn()
  * @package YunInternet\Libvirt\Configuration\Domain\Device
  */
 class Disk extends SimpleXMLImplement
 {
     protected $singletonChildAliases = [
-        "IOTune" => "iotune",
         "BackingStore" => "backingStore",
+        "IOTune" => "iotune",
     ];
 
     protected $singletonChildWrappers = [
-        "iotune" => IOTune::class,
         "address" => Address::class,
         "backingStore" => BackingStore::class,
+        "iotune" => IOTune::class,
+        "source" => Source::class,
     ];
 
     use SingletonChild;
@@ -181,5 +183,10 @@ class Disk extends SimpleXMLImplement
             };
         }
         return $this->getChildren("backingStore", $filter, BackingStore::class, true);
+    }
+
+    public function sourceClass(): string
+    {
+        return ($this->getType() === 'network' ? $this->getType() . $this->source()->getProtocol() : $this->getType());
     }
 }

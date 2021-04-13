@@ -79,7 +79,7 @@ class SimpleXMLImplement implements XMLElementContract
             // Add to collection
             if ($key === true) {
                 $collection[] = $child;
-            } else if (is_string($key) || is_integer($key)) {
+            } else if (is_string($key) || is_int($key)) {
                 $collection[$key] = $child;
             }
         }
@@ -124,9 +124,28 @@ class SimpleXMLImplement implements XMLElementContract
         return $this;
     }
 
+    public function setAttributeFromArray(string $name, array $array, string $alternative = ''): XMLElementContract
+    {
+        if (isset($array[$name]))
+        {
+            $this->simpleXMLElement[(empty($alternative) ? $name : $alternative)] = $array[$name];
+        }
+
+        return $this;
+    }
+
     public function getAttribute($name)
     {
         return $this->simpleXMLElement[$name] ? $this->simpleXMLElement[$name]->__toString() : null;
+    }
+
+    public function getAttribute2Array(string $name, array &$array, string $alternative = '')
+    {
+        $attribute = $this->getAttribute($name);
+        if (!empty($attribute)) {
+            $array[(empty($alternative) ? $name : $alternative)] = $attribute;
+        }
+        return $attribute;
     }
 
     /**

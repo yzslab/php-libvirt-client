@@ -17,6 +17,7 @@ class BackingStore extends SimpleXMLImplement
 {
     protected $singletonChildWrappers = [
         "backingStore" => self::class,
+        "source" => Source::class,
     ];
 
     use SingletonChild;
@@ -75,5 +76,10 @@ class BackingStore extends SimpleXMLImplement
     public function hasBacking(): bool
     {
         return is_null($this->findChild("backingStore")) === false && $this->backingStore()->isActive();
+    }
+
+    public function sourceClass(): string
+    {
+        return ($this->getType() === 'network' ? $this->getType() . $this->source()->getProtocol() : $this->getType());
     }
 }
